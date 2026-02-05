@@ -2,10 +2,12 @@
  * ChatBot class.
  */
 class ChatBot {
+
     /**
      * Constructor.
      */
     constructor() {
+        this.lastMessageId = '';
         this.initializeEventListeners();
         this.addWelcomeMessage();
     }
@@ -40,17 +42,88 @@ class ChatBot {
         if (message === '') return;
         
         this.addMessage(message, 'user');
+        // Save user message and get the document ID
+        this.saveMessageInDatabase({ 
+            message: message, 
+            role: 'user',
+            session: this.getCurrentSession() // You'll need to track sessions
+        }).then(documentId => {
+            // Store the document ID for updating later
+            this.lastMessageId = documentId;
+        });
+        
         input.value = '';
         
         this.showTypingIndicator();
         
         // Use API endpoint or local response
-        this.getBotResponse(message).then(response => {
+        this.getBotResponse(message).then(botResponse => {
             this.hideTypingIndicator();
-            this.addMessage(response, 'bot');
+            
+            // Update the same document with bot's response
+            this.updateMessageWithAnswer({
+                messageId: this.lastMessageId,
+                answer: botResponse
+            });
+            
+            this.addMessage(botResponse, 'bot');
         });
     }
     
+    async saveMessageInDatabase({ message, role, session }) {
+        if (role === 'user') {
+            // Create a new document with only the question
+            try {
+                const response = await fetch('/api/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: message,
+                        answer: '', // Empty initially
+                        session: session || this.getCurrentSession()
+                    })
+                });
+                
+                const data = await response.json();
+                return data._id; // Return the document ID
+            } catch (error) {
+                console.error('Error saving message:', error);
+                return null;
+            }
+        }
+    }
+
+    async updateMessageWithAnswer({ messageId, answer }) {
+        if (!messageId) return;
+        
+        try {
+            const response = await fetch(`/api/chatbot/${messageId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    answer: answer
+                })
+            });
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating message:', error);
+        }
+    }
+
+    getCurrentSession() {
+        let sessionId = localStorage.getItem('chat_session');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+            localStorage.setItem('chat_session', sessionId);
+        }
+        return sessionId;
+    }
+
     /**
      * Get bot response from server API.
      */

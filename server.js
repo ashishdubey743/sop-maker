@@ -2,11 +2,48 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
+const connectDB = require('./database/connection');
+const chatbotModel = require('./models/Chatbot');
 
+connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+app.put('/api/chatbot/:id', async (req, res) => {
+    try {
+        const { answer } = req.body;
+        const updatedMessage = await chatbotModel.findByIdAndUpdate(
+            req.params.id,
+            { answer: answer },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedMessage) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        res.json(updatedMessage);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+app.post('/api/chatbot', async (req, res) => {
+    try {
+        const { question, answer, session } = req.body;
+        console.log(req.body)
+        const chatMessage = new chatbotModel({
+            question: question,
+            answer: answer || '', // Can be empty initially
+            session: session || generateSessionId()
+        });
+
+        const savedMessage = await chatMessage.save();
+        res.status(201).json(savedMessage);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 /**
  * Get Chatbot response from API call.
  */
