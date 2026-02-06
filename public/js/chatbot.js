@@ -8,10 +8,46 @@ class ChatBot {
      */
     constructor() {
         this.lastMessageId = '';
+        this.currentSession = this.getCurrentSession();
         this.initializeEventListeners();
         this.addWelcomeMessage();
+        this.loadChatHistory();
     }
-    
+
+    /**
+     * Load chat history from database for current session
+     */
+    async loadChatHistory() {
+        try {
+            const response = await fetch(`/api/chatbot/session/${this.currentSession}`);
+
+            if (response.ok) {
+                const messages = await response.json();
+
+                if (messages.length > 0) {
+                    // Display all messages from the session
+                    messages.forEach(msg => {
+                        if (msg.question) {
+                            this.addMessage(msg.question, 'user', false);
+                        }
+                        if (msg.answer) {
+                            this.addMessage(msg.answer, 'bot', false);
+                        }
+                    });
+                } else {
+                    // If no previous messages, show welcome message
+                    this.addWelcomeMessage();
+                }
+            } else {
+                // If API fails, show welcome message
+                this.addWelcomeMessage();
+            }
+        } catch (error) {
+            console.error('Error loading chat history:', error);
+            this.addWelcomeMessage();
+        }
+    }
+
     /**
      * Initialize event listeners.
      */
@@ -21,55 +57,55 @@ class ChatBot {
                 this.sendMessage();
             }
         });
-        
+
         document.querySelector('button[onclick="chatbot.sendMessage()"]').onclick = () => this.sendMessage();
     }
-    
+
     /**
      * Add welcome message.
      */
     addWelcomeMessage() {
         this.addMessage("Hello! 👋 I'm your AI assistant. How can I help you today? You can ask me anything about coding, technology, or general knowledge!", 'bot');
     }
-    
+
     /**
      * Send message to chatbot.
      */
     sendMessage() {
         const input = document.getElementById('messageInput');
         const message = input.value.trim();
-        
+
         if (message === '') return;
-        
+
         this.addMessage(message, 'user');
         // Save user message and get the document ID
-        this.saveMessageInDatabase({ 
-            message: message, 
+        this.saveMessageInDatabase({
+            message: message,
             role: 'user',
             session: this.getCurrentSession() // You'll need to track sessions
         }).then(documentId => {
             // Store the document ID for updating later
             this.lastMessageId = documentId;
         });
-        
+
         input.value = '';
-        
+
         this.showTypingIndicator();
-        
+
         // Use API endpoint or local response
         this.getBotResponse(message).then(botResponse => {
             this.hideTypingIndicator();
-            
+
             // Update the same document with bot's response
             this.updateMessageWithAnswer({
                 messageId: this.lastMessageId,
                 answer: botResponse
             });
-            
+
             this.addMessage(botResponse, 'bot');
         });
     }
-    
+
     async saveMessageInDatabase({ message, role, session }) {
         if (role === 'user') {
             // Create a new document with only the question
@@ -85,7 +121,7 @@ class ChatBot {
                         session: session || this.getCurrentSession()
                     })
                 });
-                
+
                 const data = await response.json();
                 return data._id; // Return the document ID
             } catch (error) {
@@ -97,7 +133,7 @@ class ChatBot {
 
     async updateMessageWithAnswer({ messageId, answer }) {
         if (!messageId) return;
-        
+
         try {
             const response = await fetch(`/api/chatbot/${messageId}`, {
                 method: 'PUT',
@@ -108,7 +144,7 @@ class ChatBot {
                     answer: answer
                 })
             });
-            
+
             return await response.json();
         } catch (error) {
             console.error('Error updating message:', error);
@@ -137,7 +173,7 @@ class ChatBot {
                 },
                 body: JSON.stringify({ message: message })
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 return data.reply;
@@ -146,7 +182,7 @@ class ChatBot {
             console.log('Using local responses:', error);
         }
     }
-    
+
     /**
      * Show typing indicator.
      */
@@ -172,7 +208,7 @@ class ChatBot {
         chatContainer.appendChild(typingDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-    
+
     /**
      * Hide typing indicator.
      */
@@ -182,7 +218,7 @@ class ChatBot {
             typingIndicator.remove();
         }
     }
-    
+
     /**
      * Add message to chat container.
      */
@@ -190,13 +226,13 @@ class ChatBot {
         const chatContainer = document.getElementById('chatContainer');
         const now = new Date();
         const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
+
         const messageDiv = document.createElement('div');
         messageDiv.className = `message mb-6 ${sender === 'user' ? 'flex justify-end' : ''}`;
-        
+
         // Format code blocks if present
         let formattedText = this.formatCodeBlocks(text);
-        
+
         if (sender === 'user') {
             messageDiv.innerHTML = `
                 <div class="max-w-lg">
@@ -219,11 +255,11 @@ class ChatBot {
                 </div>
             `;
         }
-        
+
         chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-    
+
     /**
      * Format code blocks.
      */
@@ -236,7 +272,7 @@ class ChatBot {
                 .replace(/const|let|var|function|return|require/g, '<span class="code-keyword">$&</span>')
                 .replace(/'[^']*'|"[^"]*"/g, '<span class="code-string">$&</span>')
                 .replace(/\/\/.*/g, '<span class="code-comment">$&</span>');
-            
+
             return `<div class="code-block">${escapedCode}</div>`;
         });
     }
