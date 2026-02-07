@@ -4,6 +4,8 @@ const app = express();
 const path = require('path');
 const connectDB = require('./database/connection');
 const chatbotModel = require('./models/Chatbot');
+const NotionService = require('./services/NotionService');
+const notionService = new NotionService();
 
 connectDB();
 app.use(express.json());
@@ -31,7 +33,6 @@ app.put('/api/chatbot/:id', async (req, res) => {
 app.post('/api/chatbot', async (req, res) => {
     try {
         const { question, answer, session } = req.body;
-        console.log(req.body)
         const chatMessage = new chatbotModel({
             question: question,
             answer: answer || '', // Can be empty initially
@@ -47,55 +48,6 @@ app.post('/api/chatbot', async (req, res) => {
 /**
  * Get Chatbot response from API call.
  */
-// app.post('/api/chat', async (req, res) => {
-//     try {
-//         const { message } = req.body;
-
-//         if (!message) {
-//             return res.status(400).json({ error: "Message is required" });
-//         }
-
-//         const response = await fetch(
-//             `${process.env.CHATBOT_BASE_URL}`,
-//             {
-//                 method: 'POST',
-//                 headers: {
-//                     'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify({
-//                     model: process.env.CHATBOT_MODEL,
-//                     messages: [
-//                         {
-//                             role: "user",
-//                             content: message
-//                         }
-//                     ]
-//                 })
-//             }
-//         );
-
-//         if (!response.ok) {
-//             const errText = await response.text();
-//             throw new Error(`Chatbot API error: ${response.status} - ${errText}`);
-//         }
-
-//         const data = await response.json();
-
-//         const reply =
-//             data.choices?.[0]?.message?.content ||
-//             "No response from AI";
-
-//         res.json({ reply });
-
-//     } catch (error) {
-//         console.error('Error:', error);
-//         res.status(500).json({
-//             reply: "AI service is currently unavailable. Please try again later."
-//         });
-//     }
-// });
-
 app.post('/api/chat', async (req, res) => {
     try {
         const { message, style = 'standard' } = req.body;
@@ -104,73 +56,8 @@ app.post('/api/chat', async (req, res) => {
             return res.status(400).json({ error: "Message is required" });
         }
 
-        // Enhanced prompt to force structured SOP output
-        const enhancedPrompt = `
-        The user wants to create a Standard Operating Procedure (SOP). 
-        Based on their input: "${message}"
-        
-        Generate a COMPLETE SOP in ONE OF THESE STRUCTURES:
-        
-        ${style === 'quick' ? `
-        ## QUICK SOP FORMAT:
-        **Title:** [Clear procedure name]
-        **Purpose:** [1-2 sentences]
-        **Steps:**
-        1. [Step 1]
-        2. [Step 2]
-        3. [Step 3]
-        **Responsible:** [Role/Person]
-        **Documents:** [Any forms/tools needed]
-        ` : style === 'detailed' ? `
-        ## DETAILED SOP FORMAT:
-        ### SOP TITLE: [Name]
-        ### 1. PURPOSE
-        [Why this exists]
-        
-        ### 2. SCOPE
-        [Who/What this applies to]
-        
-        ### 3. RESPONSIBILITIES
-        - [Role 1]: [Tasks]
-        - [Role 2]: [Tasks]
-        
-        ### 4. PROCEDURE STEPS
-        Step 1: [Action]
-        Step 2: [Action]
-        Step 3: [Action]
-        
-        ### 5. QUALITY CHECKS
-        [Verification points]
-        
-        ### 6. DOCUMENTATION
-        [Records to keep]
-        ` : `
-        ## STANDARD SOP FORMAT:
-        **Procedure:** [What's being documented]
-        **Purpose:** [Why it's important - 2-3 sentences]
-        **Applicable To:** [Department/Role]
-        **Procedure Steps:**
-        ① [First action with verb]
-        ② [Second action with verb]
-        ③ [Third action with verb]
-        **Responsible Persons:**
-        - [Role]: [Specific duty]
-        **Tools/Documents:**
-        - [Form/Tool 1]
-        **Important Notes:**
-        - [Warning or tip]
-        `}
-        
-        IMPORTANT RULES:
-        1. Generate COMPLETE SOP - don't leave placeholders like [ ]
-        2. Use ACTUAL content based on user's description
-        3. Keep it practical and actionable
-        4. Format with clear headings and bullet points
-        5. Include 3-5 main steps
-        6. Make it ready to use immediately
-        
-        Output ONLY the SOP, no additional explanations.
-        `;
+        // Enhanced prompt with database table detection
+        const prompt = notionService.getPrompt({message: message, style:style});
 
         const response = await fetch(
             `${process.env.CHATBOT_BASE_URL}`,
@@ -185,14 +72,14 @@ app.post('/api/chat', async (req, res) => {
                     messages: [
                         {
                             role: "system",
-                            content: "You are an expert SOP writer who creates clear, practical Standard Operating Procedures. Always output complete, ready-to-use SOPs."
+                            content: notionService.getTableAnalysisPrompt(),
                         },
                         {
                             role: "user",
-                            content: enhancedPrompt
+                            content: prompt
                         }
                     ],
-                    temperature: 0.3 // Lower temp for more consistent structure
+                    temperature: 0.3
                 })
             }
         );
@@ -203,59 +90,39 @@ app.post('/api/chat', async (req, res) => {
         }
 
         const data = await response.json();
-
         const sopContent = data.choices?.[0]?.message?.content || "No response from AI";
+        const sopTitle = notionService.getContentTitle(sopContent);
 
-        // Extract SOP title from content
-        const titleMatch = sopContent.match(/(?:Title:|SOP TITLE:|Procedure:)\s*(.+?)(?:\n|$)/i);
-        const sopTitle = titleMatch ? titleMatch[1].trim() : `SOP - ${new Date().toLocaleDateString()}`;
+        const hasDatabaseTable = notionService.hasDatabaseTable(sopContent);
 
-        // Create SOP in Notion
-        const notionResponse = await fetch('https://api.notion.com/v1/pages', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.NOTION_API_KEY}`,
-                'Content-Type': 'application/json',
-                'Notion-Version': '2022-06-28'
-            },
-            body: JSON.stringify({
-                parent: {
-                    type: "page_id",
-                    page_id: process.env.NOTION_PARENT_PAGE_ID || "2e32607e24f98093b4aedd476d650011"
-                },
-                properties: {
-                    title: {
-                        title: [
-                            {
-                                text: {
-                                    content: sopTitle
-                                }
-                            }
-                        ]
-                    }
-                },
-                children: parseSOPToNotionBlocks(sopContent, style)
-            })
-        });
+        // Parse content with enhanced table detection
+        const notionBlocks = notionService.prepareDataWithTablesIfExist(sopContent, style);
+
+        // Create Notion page
+        const notionResponse = await createNotionPageWithTables(sopTitle, notionBlocks, hasDatabaseTable);
 
         if (!notionResponse.ok) {
-            console.error('Notion API error:', await notionResponse.text());
-            // Still return SOP content even if Notion fails
+            const errorText = await notionResponse.text();
+            console.error('Notion API error:', errorText);
             return res.json({
                 reply: sopContent,
                 notionSuccess: false,
-                message: "SOP generated but failed to save to Notion"
+                message: "SOP generated but failed to save to Notion",
+                hasDatabaseTable: hasDatabaseTable
             });
         }
 
         const notionData = await notionResponse.json();
-        const notionUrl = notionData.url || `https://notion.so/${notionData.id.replace(/-/g, '')}`;
+        const notionUrl = notionData.url;
 
         res.json({
-            reply: `${sopContent}\n\n---\n✅ **SOP has been saved to Notion!**\n📄 View it here: ${notionUrl}`,
+            content: sopContent,
+            reply: `✅ SOP "${sopTitle}" created Successfully. Please visit ${notionUrl} to preview.`,
             notionSuccess: true,
             notionUrl: notionUrl,
-            sopTitle: sopTitle
+            sopTitle: sopTitle,
+            hasDatabaseTable: hasDatabaseTable,
+            preview: `✅ SOP "${sopTitle}" created${hasDatabaseTable ? ' with database schema' : ''}`
         });
 
     } catch (error) {
@@ -267,85 +134,88 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// Helper function to convert SOP text to Notion blocks
-function parseSOPToNotionBlocks(sopContent, style) {
-    const lines = sopContent.split('\n');
-    const blocks = [];
-    
-    lines.forEach(line => {
-        if (!line.trim()) return;
-        
-        let block = null;
-        
-        // Detect headings
-        if (line.match(/^#{1,3}\s/) || line.match(/^[A-Z][A-Z\s]+\:/)) {
-            block = {
-                object: "block",
-                type: "heading_2",
-                heading_2: {
-                    rich_text: [{
-                        type: "text",
-                        text: { content: line.replace(/^#{1,3}\s/, '').replace(/^\*\*|\*\*$/g, '') }
-                    }]
-                }
-            };
-        }
-        // Detect numbered steps
-        else if (line.match(/^\d+[\.\)]\s/) || line.match(/^[①②③④⑤]\s/)) {
-            block = {
-                object: "block",
-                type: "bulleted_list_item",
-                bulleted_list_item: {
-                    rich_text: [{
-                        type: "text",
-                        text: { content: line }
-                    }]
-                }
-            };
-        }
-        // Detect bullet points
-        else if (line.match(/^[-•*]\s/)) {
-            block = {
-                object: "block",
-                type: "bulleted_list_item",
-                bulleted_list_item: {
-                    rich_text: [{
-                        type: "text",
-                        text: { content: line.substring(2) }
-                    }]
-                }
-            };
-        }
-        // Regular paragraphs
-        else {
-            block = {
-                object: "block",
-                type: "paragraph",
-                paragraph: {
-                    rich_text: [{
-                        type: "text",
-                        text: { content: line }
-                    }]
-                }
-            };
-        }
-        
-        if (block) blocks.push(block);
+
+
+
+
+// Create Notion page with proper formatting
+async function createNotionPageWithTables(title, children, hasDatabaseTable) {
+    const pageData = {
+        parent: {
+            type: "page_id",
+            page_id: process.env.NOTION_PARENT_PAGE_ID
+        },
+        properties: {
+            title: {
+                title: [{ text: { content: title } }]
+            }
+        },
+        children: children
+    };
+
+    // Add icon and cover for database-heavy SOPs
+    if (hasDatabaseTable) {
+        pageData.icon = { type: "emoji", emoji: "🗃️" };
+        pageData.cover = {
+            type: "external",
+            external: {
+                url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+            }
+        };
+    } else {
+        pageData.icon = { type: "emoji", emoji: "📋" };
+    }
+    console.log(pageData);
+    return fetch('https://api.notion.com/v1/pages', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.NOTION_API_KEY}`,
+            'Content-Type': 'application/json',
+            'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify(pageData)
     });
-    
-    return blocks;
 }
+
+// Test endpoint to verify table detection
+app.post('/api/test-table-detection', async (req, res) => {
+    const testCases = [
+        {
+            input: "Create SOP for tracking customer orders with database",
+            shouldHaveTable: true,
+            expectedColumns: ["order_id", "customer_id", "product", "quantity", "status"]
+        },
+        {
+            input: "How to reset user passwords",
+            shouldHaveTable: false
+        },
+        {
+            input: "Procedure for logging server maintenance activities",
+            shouldHaveTable: true,
+            expectedColumns: ["log_id", "server_name", "maintenance_type", "duration", "technician"]
+        },
+        {
+            input: "Simple checklist for office opening",
+            shouldHaveTable: false
+        }
+    ];
+
+    res.json({
+        testCases,
+        message: "These inputs should trigger appropriate table generation"
+    });
+});
 /**
  * Get chat history for a specific session
  */
 app.get('/api/chatbot/session/:sessionId', async (req, res) => {
     try {
         const { sessionId } = req.params;
-        
-        const messages = await chatbotModel.find({ 
-            session: sessionId 
+
+        const messages = await chatbotModel.find({
+            session: sessionId
         }).sort({ createdAt: 1 }); // Sort by creation time, oldest first
-        
+
         res.json(messages);
     } catch (error) {
         res.status(500).json({ error: error.message });
