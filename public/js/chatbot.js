@@ -250,6 +250,11 @@ class ChatBot {
                     </div>
                     <div class="bg-blue-50 rounded-2xl rounded-tl-none px-4 py-3 max-w-lg">
                         <div class="text-gray-800 whitespace-pre-line">${formattedText}</div>
+                        <div class="mt-3">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                Export Docx
+                            </button>
+                        </div>
                         <p class="text-gray-500 text-sm mt-2">${timeString}</p>
                     </div>
                 </div>

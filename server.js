@@ -5,7 +5,10 @@ const path = require('path');
 const connectDB = require('./database/connection');
 const chatbotModel = require('./models/Chatbot');
 const NotionService = require('./services/NotionService');
+const docxService = require('./services/DocxService');
 const notionService = new NotionService();
+const cleanupService = require('./services/CleanupService');
+cleanupService.scheduleCleanup();
 
 connectDB();
 app.use(express.json());
@@ -92,39 +95,19 @@ app.post('/api/chat', async (req, res) => {
         const data = await response.json();
         const sopContent = data.choices?.[0]?.message?.content || "No response from AI";
         const sopTitle = notionService.getContentTitle(sopContent);
-
-        const hasDatabaseTable = notionService.hasDatabaseTable(sopContent);
-
-        // Parse content with enhanced table detection
-        const notionBlocks = notionService.prepareDataWithTablesIfExist(sopContent, style);
-
-        // Create Notion page
-        const notionResponse = await createNotionPageWithTables(sopTitle, notionBlocks, hasDatabaseTable);
-
-        if (!notionResponse.ok) {
-            const errorText = await notionResponse.text();
-            console.error('Notion API error:', errorText);
-            return res.json({
-                reply: sopContent,
-                notionSuccess: false,
-                message: "SOP generated but failed to save to Notion",
-                hasDatabaseTable: hasDatabaseTable
+        try {
+            const docBuffer = await docxService.createSopDocument(sopContent, sopTitle);
+            const savedDocumentPath = await docxService.saveDocumentToFile(docBuffer, `./storage/temp/`, `${sopTitle.replace(/\s+/g, '_')}.docx`);
+            res.json({
+                sucess: true,
+                content: sopContent,
+                docxPath: savedDocumentPath,
+                reply: `✅ SOP "${sopTitle}" created Successfully`,
+                sopTitle: sopTitle,
             });
-        }
-
-        const notionData = await notionResponse.json();
-        const notionUrl = notionData.url;
-
-        res.json({
-            content: sopContent,
-            reply: `✅ SOP "${sopTitle}" created Successfully. Please visit ${notionUrl} to preview.`,
-            notionSuccess: true,
-            notionUrl: notionUrl,
-            sopTitle: sopTitle,
-            hasDatabaseTable: hasDatabaseTable,
-            preview: `✅ SOP "${sopTitle}" created${hasDatabaseTable ? ' with database schema' : ''}`
-        });
-
+          } catch (error) {
+            console.error('Error creating document:', error);
+          }
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({
@@ -177,34 +160,6 @@ async function createNotionPageWithTables(title, children, hasDatabaseTable) {
     });
 }
 
-// Test endpoint to verify table detection
-app.post('/api/test-table-detection', async (req, res) => {
-    const testCases = [
-        {
-            input: "Create SOP for tracking customer orders with database",
-            shouldHaveTable: true,
-            expectedColumns: ["order_id", "customer_id", "product", "quantity", "status"]
-        },
-        {
-            input: "How to reset user passwords",
-            shouldHaveTable: false
-        },
-        {
-            input: "Procedure for logging server maintenance activities",
-            shouldHaveTable: true,
-            expectedColumns: ["log_id", "server_name", "maintenance_type", "duration", "technician"]
-        },
-        {
-            input: "Simple checklist for office opening",
-            shouldHaveTable: false
-        }
-    ];
-
-    res.json({
-        testCases,
-        message: "These inputs should trigger appropriate table generation"
-    });
-});
 /**
  * Get chat history for a specific session
  */

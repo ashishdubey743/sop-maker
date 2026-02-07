@@ -98,13 +98,6 @@ class NotionService {
         return titleMatch ? titleMatch[1].trim() : `SOP - ${new Date().toLocaleDateString()}`;
     }
 
-    // Check if SOP contains a database table
-    hasDatabaseTable(content) {
-        return content.includes('| Column |') ||
-            content.includes('DATABASE TABLE') ||
-            content.match(/\|.*\|.*\|.*\|/);
-    }
-
     prepareDataWithTablesIfExist(content, style) {
         const lines = content.split('\n');
         const blocks = [];
