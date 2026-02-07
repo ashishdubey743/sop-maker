@@ -31,7 +31,7 @@ class ChatBot {
                             this.addMessage(msg.question, 'user', false);
                         }
                         if (msg.answer) {
-                            this.addMessage(msg.answer, 'bot', false);
+                            this.addMessage(msg.answer, 'bot', msg.docPath);
                         }
                     });
                 } else {
@@ -93,16 +93,16 @@ class ChatBot {
         this.showTypingIndicator();
 
         // Use API endpoint or local response
-        this.getBotResponse(message).then(botResponse => {
+        this.getBotResponse(message).then(({ botResponse, docPath }) => {
             this.hideTypingIndicator();
-
             // Update the same document with bot's response
             this.updateMessageWithAnswer({
                 messageId: this.lastMessageId,
-                answer: botResponse
+                answer: botResponse,
+                docPath: docPath
             });
 
-            this.addMessage(botResponse, 'bot');
+            this.addMessage(botResponse, 'bot', docPath);
         });
     }
 
@@ -131,7 +131,7 @@ class ChatBot {
         }
     }
 
-    async updateMessageWithAnswer({ messageId, answer }) {
+    async updateMessageWithAnswer({ messageId, answer, docPath }) {
         if (!messageId) return;
 
         try {
@@ -141,7 +141,8 @@ class ChatBot {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    answer: answer
+                    answer: answer,
+                    docPath: docPath
                 })
             });
 
@@ -176,7 +177,7 @@ class ChatBot {
 
             if (response.ok) {
                 const data = await response.json();
-                return data.reply;
+                return { botResponse: data.botResponse, docPath: data.docPath };
             }
         } catch (error) {
             console.log('Using local responses:', error);
@@ -222,7 +223,7 @@ class ChatBot {
     /**
      * Add message to chat container.
      */
-    addMessage(text, sender) {
+    addMessage(text, sender, filename = null) {
         const chatContainer = document.getElementById('chatContainer');
         const now = new Date();
         const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -251,9 +252,9 @@ class ChatBot {
                     <div class="bg-blue-50 rounded-2xl rounded-tl-none px-4 py-3 max-w-lg">
                         <div class="text-gray-800 whitespace-pre-line">${formattedText}</div>
                         <div class="mt-3">
-                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                                Export Docx
-                            </button>
+                            <a class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer" href="/download/doc/${filename}" download>
+                                Export SOP
+                            </a>
                         </div>
                         <p class="text-gray-500 text-sm mt-2">${timeString}</p>
                     </div>

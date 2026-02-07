@@ -1,46 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>ChatBot UI</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto max-w-4xl p-4">
 
-        <!-- Chat Container -->
-        <div class="bg-white shadow-lg rounded-2xl mb-4" style="height: 70vh;">
-            <!-- Messages Container -->
-            <div id="chatContainer" class="p-6 h-full overflow-y-auto">
-                <!-- Messages will be added here dynamically -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom UI Enhancements -->
+    <style>
+        /* Scrollbar polish */
+        #chatContainer::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chatContainer::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 10px;
+        }
+        #chatContainer::-webkit-scrollbar-track {
+            background: transparent;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-100 to-slate-200 min-h-screen">
+
+<div class="container mx-auto max-w-4xl p-4">
+
+    <!-- Chat Card -->
+    <div class="bg-gradient-to-br from-slate-50 via-white to-slate-100 shadow-xl rounded-2xl border border-slate-200 flex flex-col" style="height: 95vh;">
+
+        <!-- Chat Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                    🤖
+                </div>
+                <div>
+                    <p class="font-semibold text-slate-800">AI Chatbot</p>
+                    <p class="text-xs text-green-600">Online</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div
+            id="chatContainer"
+            class="flex-1 p-6 overflow-y-auto bg-[radial-gradient(circle_at_top,_#f8fafc,_#eef2ff)]"
+        >
+
+            <!-- BOT MESSAGE SAMPLE -->
+            <div class="flex justify-start mb-4">
+                <div class="max-w-[75%] bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm border border-slate-200">
+                    Hello! How can I help you today?
+                </div>
             </div>
 
-            <!-- Input Area -->
-            <div class="border-t p-4">
-                <div class="flex items-center space-x-4">
-                    <div class="flex-1 relative">
-                        <input 
-                            type="text" 
-                            id="messageInput" 
-                            placeholder="Type your message here..." 
-                            class="w-full border border-gray-300 rounded-full py-3 px-5 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
+            <!-- USER MESSAGE SAMPLE -->
+            <div class="flex justify-end mb-4">
+                <div class="max-w-[75%] bg-gradient-to-br from-indigo-500 to-purple-600 text-white px-4 py-3 rounded-2xl rounded-br-md shadow-md">
+                    I want to improve my chatbot UI.
+                </div>
+            </div>
+
+            <!-- LOADING INDICATOR (toggle via JS later) -->
+            <div id="loadingIndicator" class="hidden flex justify-start mb-4">
+                <div class="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
+                    <div class="flex space-x-1">
+                        <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></span>
+                        <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.15s]"></span>
+                        <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.3s]"></span>
                     </div>
-                    <button onclick="chatbot.sendMessage()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-full hover:opacity-90 transition duration-200">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Input Area -->
+        <div class="border-t border-slate-200 p-4 bg-white rounded-b-2xl">
+            <div class="flex flex-col space-y-3">
+                <textarea
+                    id="messageInput"
+                    placeholder="Type your message here..."
+                    rows="3"
+                    class="w-full bg-white border border-slate-300 rounded-2xl py-3 px-5 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y min-h-[60px] max-h-[160px] shadow-inner"
+                    onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); chatbot.sendMessage(); }"
+                ></textarea>
+
+                <div class="flex justify-end">
+                    <button
+                        onclick="chatbot.sendMessage()"
+                        class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2.5 px-7 rounded-full shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center space-x-2"
+                    >
                         <i class="fas fa-paper-plane"></i>
+                        <span class="font-medium">Send</span>
                     </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- JavaScript Files -->
-    <script src="/js/chatbot.js"></script>
+    </div>
+</div>
+
+<!-- Existing JS (unchanged) -->
+<script src="/js/chatbot.js"></script>
+
 </body>
 </html>

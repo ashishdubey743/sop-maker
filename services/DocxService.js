@@ -4,6 +4,9 @@ const {
   AlignmentType, WidthType, BorderStyle, convertInchesToTwip,
   ShadingType, UnderlineType, ExternalHyperlink, ImageRun
 } = require("docx");
+const { nanoid } = require('nanoid');
+const fs = require('fs').promises;
+const path = require('path');
 
 class DocxService {
   /**
@@ -526,12 +529,11 @@ class DocxService {
    * Save document to file (optional helper)
    */
   async saveDocumentToFile(buffer, folder, filename) {
-    const fs = require('fs').promises;
-    const path = require('path');
+    filename = nanoid()+'_'+filename;
     await fs.mkdir(folder, { recursive: true });
     const filePath = path.join(folder, filename);
     await fs.writeFile(filePath, buffer);
-    return filePath;
+    return filename;
   }
 }
 

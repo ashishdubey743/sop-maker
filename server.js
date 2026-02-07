@@ -17,10 +17,10 @@ app.use(express.static('public'));
 
 app.put('/api/chatbot/:id', async (req, res) => {
     try {
-        const { answer } = req.body;
+        const { answer, docPath } = req.body;
         const updatedMessage = await chatbotModel.findByIdAndUpdate(
             req.params.id,
-            { answer: answer },
+            { answer: answer, docPath: docPath },
             { new: true, runValidators: true }
         );
 
@@ -60,7 +60,7 @@ app.post('/api/chat', async (req, res) => {
         }
 
         // Enhanced prompt with database table detection
-        const prompt = notionService.getPrompt({message: message, style:style});
+        const prompt = notionService.getPrompt({ message: message, style: style });
 
         const response = await fetch(
             `${process.env.CHATBOT_BASE_URL}`,
@@ -97,21 +97,21 @@ app.post('/api/chat', async (req, res) => {
         const sopTitle = notionService.getContentTitle(sopContent);
         try {
             const docBuffer = await docxService.createSopDocument(sopContent, sopTitle);
-            const savedDocumentPath = await docxService.saveDocumentToFile(docBuffer, `./storage/temp/`, `${sopTitle.replace(/\s+/g, '_')}.docx`);
+            const fileName = await docxService.saveDocumentToFile(docBuffer, `./storage/temp/`, `${sopTitle.replace(/\s+/g, '_')}.docx`);
             res.json({
                 sucess: true,
                 content: sopContent,
-                docxPath: savedDocumentPath,
-                reply: `✅ SOP "${sopTitle}" created Successfully`,
+                docPath: fileName,
+                botResponse: `✅ SOP "${sopTitle}" created Successfully`,
                 sopTitle: sopTitle,
             });
-          } catch (error) {
+        } catch (error) {
             console.error('Error creating document:', error);
-          }
+        }
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({
-            reply: "Error processing your request. Please try again later.",
+            botResponse: "Error processing your request. Please try again later.",
             notionSuccess: false
         });
     }
@@ -182,6 +182,20 @@ app.get('/api/chatbot/session/:sessionId', async (req, res) => {
  */
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/download/doc/:filename', async (req, res) => {
+    try {
+        const { filename } = req.params;
+        let chatbotRecord = await chatbotModel.find({ docPath: filename });
+        console.log(chatbotRecord);
+        const path = 'storage/temp/'+chatbotRecord[0].docPath;
+        
+        res.download(path, 'SOP-'+Date.now()+'.docx');
+    } catch (error) {
+        console.error('Error downloading document:', error);
+        res.status(500).send('Error downloading document');
+    }
 });
 
 /**

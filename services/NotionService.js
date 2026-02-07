@@ -95,7 +95,8 @@ class NotionService {
         const titleMatch = content.match(/^#\s*(.+?)(?:\n|$)/) ||
             content.match(/SOP:\s*(.+?)(?:\n|$)/i) ||
             content.match(/📋\s*(.+?)(?:\n|$)/);
-        return titleMatch ? titleMatch[1].trim() : `SOP - ${new Date().toLocaleDateString()}`;
+        
+        return titleMatch ? titleMatch[1].replace('📋', '').trim() : `SOP - ${new Date().toLocaleDateString()}`;
     }
 
     prepareDataWithTablesIfExist(content, style) {
