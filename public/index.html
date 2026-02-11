@@ -108,6 +108,49 @@
 
 <!-- Existing JS (unchanged) -->
 <script src="/js/chatbot.js"></script>
+<script>
+    async function checkAuth() {
+    try {
+        const response = await fetch('/auth/me');
+        if (!response.ok) {
+            // Redirect to login if not authenticated
+            window.location.href = '/login.html';
+            return null;
+        }
+        return await response.json();
+    } catch (error) {
+        window.location.href = '/login.html';
+        return null;
+    }
+}
+
+// Use it when your app loads
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = await checkAuth();
+    if (user) {
+        // User is authenticated, load the app
+        console.log('Welcome', user.name);
+        
+        // Add user info to UI
+        const userElement = document.createElement('div');
+        userElement.innerHTML = `
+            <div style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                👤 ${user.name}
+                <button onclick="logout()" style="margin-left: 10px; background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                    Logout
+                </button>
+            </div>
+        `;
+        document.body.appendChild(userElement);
+    }
+});
+
+// Logout function
+async function logout() {
+    await fetch('/auth/logout', { method: 'POST' });
+    window.location.href = '/login.html';
+}
+</script>
 
 </body>
 </html>

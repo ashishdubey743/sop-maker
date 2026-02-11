@@ -1,0 +1,102 @@
+<!-- public/login.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - SOP Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .google-btn {
+            background: #4285F4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px auto;
+        }
+        .google-btn:hover {
+            background: #357ae8;
+        }
+        .user-info {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>SOP Generator</h1>
+        <p>Please sign in to continue</p>
+        
+        <button class="google-btn" onclick="loginWithGoogle()">
+            <img src="https://www.google.com/favicon.ico" width="20" height="20" alt="Google">
+            Sign in with Google
+        </button>
+        
+        <div id="userInfo" class="user-info" style="display: none;">
+            <p>Welcome, <span id="userName"></span></p>
+            <button onclick="logout()">Logout</button>
+        </div>
+        
+        <div id="error" style="color: red; margin-top: 10px;"></div>
+    </div>
+
+    <script>
+        // Check if already logged in
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/me');
+                if (response.ok) {
+                    const user = await response.json();
+                    showUserInfo(user);
+                    // Redirect to main page if authenticated
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                // Not authenticated, stay on login page
+            }
+        }
+
+        function loginWithGoogle() {
+            window.location.href = '/auth/google';
+        }
+
+        async function logout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+                window.location.reload();
+            } catch (error) {
+                document.getElementById('error').textContent = 'Logout failed';
+            }
+        }
+
+        function showUserInfo(user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userInfo').style.display = 'block';
+        }
+
+        // Check auth status on page load
+        checkAuth();
+    </script>
+</body>
+</html>
