@@ -1,4 +1,4 @@
-const notionService = require('@services/NotionService');
+const chatbotService = require('@services/ChatbotService');
 const docxService = require('@services/DocxService');
 
 
@@ -11,7 +11,7 @@ exports.ChatWithAIModel = async (req, res) => {
         }
 
         // Enhanced prompt with database table detection
-        const prompt = notionService.getPrompt({ message: message, style: style });
+        const prompt = chatbotService.getPrompt({ message: message, style: style });
 
         const response = await fetch(
             `${process.env.CHATBOT_BASE_URL}`,
@@ -26,7 +26,7 @@ exports.ChatWithAIModel = async (req, res) => {
                     messages: [
                         {
                             role: "system",
-                            content: notionService.getTableAnalysisPrompt(),
+                            content: chatbotService.getTableAnalysisPrompt(),
                         },
                         {
                             role: "user",
@@ -45,7 +45,7 @@ exports.ChatWithAIModel = async (req, res) => {
 
         const data = await response.json();
         const sopContent = data.choices?.[0]?.message?.content || "No response from AI";
-        const sopTitle = notionService.getContentTitle(sopContent);
+        const sopTitle = chatbotService.getContentTitle(sopContent);
         try {
             const docBuffer = await docxService.createSopDocument(sopContent, sopTitle);
             const fileName = await docxService.saveDocumentToFile(docBuffer, `./storage/temp/`, `${sopTitle.replace(/\s+/g, '_')}.docx`);

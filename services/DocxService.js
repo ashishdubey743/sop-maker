@@ -1,7 +1,7 @@
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell,
   AlignmentType, WidthType, BorderStyle, convertInchesToTwip,
-  ShadingType, UnderlineType, ExternalHyperlink, ImageRun
+  ShadingType
 } = require("docx");
 const { nanoid } = require('nanoid');
 const fs = require('fs').promises;
