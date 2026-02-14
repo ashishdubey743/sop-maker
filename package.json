@@ -17,6 +17,7 @@
     "express-session": "^1.19.0",
     "module-alias": "^2.3.4",
     "mongoose": "^9.1.6",
+    "mongoose-delete": "^1.0.7",
     "nanoid": "^5.1.6",
     "node-cron": "^4.2.1"
   },

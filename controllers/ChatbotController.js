@@ -59,3 +59,17 @@ exports.downloadSOP = async (req, res) => {
         res.status(500).send('Error downloading document');
     }
 }
+
+exports.clearChat = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const result = await chatbotModel.delete({ userId: userId });
+        
+        res.json({
+            message: 'Chat history cleared successfully',
+            deletedCount: result.deletedCount
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

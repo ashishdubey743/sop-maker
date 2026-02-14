@@ -25,7 +25,7 @@ class ChatBot {
                 const emptyState = document.getElementById('emptyState');
 
                 const messages = await response.json();
-                
+
                 if (messages.length > 0) {
                     emptyState.style.display = 'none';
                     this.coversationAvailable = true;
@@ -173,7 +173,7 @@ class ChatBot {
                 return { botResponse: data.botResponse, docPath: data.docPath };
             }
         } catch (error) {
-            console.log('Using local responses:', error);
+            console.log('Error processing request:', error);
         }
     }
 
@@ -274,6 +274,32 @@ class ChatBot {
 
             return `<div class="code-block">${escapedCode}</div>`;
         });
+    }
+
+    /**
+    * Clear the current user conversation.
+    */
+    async clearChat() {
+        try {
+            // Try to get response from server API
+            const response = await fetch('/api/chatbot/clear', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Chat cleared!", result);
+                // Optionally reload the chat interface or reset the chat state
+                // For example: this.loadChatHistory();
+            } else {
+                console.error("Failed to clear chat:", response.status);
+            }
+        } catch (error) {
+            console.error('Error clearing chat:', error);
+        }
     }
 }
 

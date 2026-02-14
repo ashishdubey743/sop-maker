@@ -41,6 +41,14 @@ router.get('/api/chatbot/session/:sessionId',
 );
 
 /**
+* Clear chat history
+*/
+router.delete('/api/chatbot/clear',
+    isAuthenticated,
+    ChatbotController.clearChat
+);
+
+/**
  * Download SOP
  */
 router.get('/download/doc/:filename',

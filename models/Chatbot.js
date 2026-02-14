@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongooseDelete = require('mongoose-delete');
 
 const chatbotSchema = new mongoose.Schema(
     {
@@ -15,5 +16,10 @@ const chatbotSchema = new mongoose.Schema(
         }
       }
 );
+
+chatbotSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  overrideMethods: 'all'
+});
 
 module.exports = mongoose.model('Chatbot', chatbotSchema);
