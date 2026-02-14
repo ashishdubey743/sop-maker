@@ -10,7 +10,6 @@ class ChatBot {
         this.lastMessageId = '';
         this.currentSession = this.getCurrentSession();
         this.initializeEventListeners();
-        this.addWelcomeMessage();
         this.loadChatHistory();
     }
 
@@ -34,17 +33,10 @@ class ChatBot {
                             this.addMessage(msg.answer, 'bot', msg.docPath);
                         }
                     });
-                } else {
-                    // If no previous messages, show welcome message
-                    this.addWelcomeMessage();
                 }
-            } else {
-                // If API fails, show welcome message
-                this.addWelcomeMessage();
             }
         } catch (error) {
             console.error('Error loading chat history:', error);
-            this.addWelcomeMessage();
         }
     }
 
@@ -59,13 +51,6 @@ class ChatBot {
         });
 
         document.querySelector('button[onclick="chatbot.sendMessage()"]').onclick = () => this.sendMessage();
-    }
-
-    /**
-     * Add welcome message.
-     */
-    addWelcomeMessage() {
-        this.addMessage("Hello! 👋 I'm your AI assistant. How can I help you today? You can ask me anything about coding, technology, or general knowledge!", 'bot');
     }
 
     /**
