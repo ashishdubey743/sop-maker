@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const { generateCodeVerifier } = require("arctic");
-const googleAuth = require('../config/googleAuth');
-const User = require('../models/User');
+const googleAuth = require('@config/googleAuth');
+const User = require('@models/User');
 
 exports.googleLogin = async (req, res) => {
     try {

@@ -15,8 +15,18 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "module-alias": "^2.3.4",
     "mongoose": "^9.1.6",
     "nanoid": "^5.1.6",
     "node-cron": "^4.2.1"
+  },
+  "_moduleAliases": {
+    "@controllers": "controllers",
+    "@models": "models",
+    "@routes": "routes",
+    "@services": "services",
+    "@middlewares": "middlewares",
+    "@database": "database",
+    "@config": "config"
   }
 }

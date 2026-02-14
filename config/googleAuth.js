@@ -1,4 +1,3 @@
-// config/googleAuth.js
 const { Google } = require("arctic");
 
 const google = new Google(

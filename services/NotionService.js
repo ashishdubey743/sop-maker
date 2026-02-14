@@ -289,4 +289,4 @@ class NotionService {
         };
     }
 }
-module.exports = NotionService;
+module.exports = new NotionService();
