@@ -8,6 +8,7 @@ class ChatBot {
      */
     constructor() {
         this.lastMessageId = '';
+        this.coversationAvailable = false;
         this.currentSession = this.getCurrentSession();
         this.initializeEventListeners();
         this.loadChatHistory();
@@ -21,9 +22,13 @@ class ChatBot {
             const response = await fetch(`/api/chatbot/session/${this.currentSession}`);
 
             if (response.ok) {
-                const messages = await response.json();
+                const emptyState = document.getElementById('emptyState');
 
+                const messages = await response.json();
+                
                 if (messages.length > 0) {
+                    emptyState.style.display = 'none';
+                    this.coversationAvailable = true;
                     // Display all messages from the session
                     messages.forEach(msg => {
                         if (msg.question) {
@@ -33,6 +38,8 @@ class ChatBot {
                             this.addMessage(msg.answer, 'bot', msg.docPath);
                         }
                     });
+                } else {
+                    emptyState.style.display = 'flex';
                 }
             }
         } catch (error) {
@@ -61,7 +68,8 @@ class ChatBot {
         const message = input.value.trim();
 
         if (message === '') return;
-
+        const emptyState = document.getElementById('emptyState');
+        emptyState.style.display = 'none';
         this.addMessage(message, 'user');
         // Save user message and get the document ID
         this.saveMessageInDatabase({
