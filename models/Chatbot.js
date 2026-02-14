@@ -6,7 +6,7 @@ const chatbotSchema = new mongoose.Schema(
         answer: { type: String, default: '' },
         docPath: { type: String, default: ''},
         is_expired: { type: Boolean, default: false },
-        session: { type: String, required: true }
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
       },
       {
         timestamps: {

@@ -21,11 +21,11 @@ exports.updateMessageWithAnswer = async (req, res) => {
 
 exports.saveMessageInDatabase = async (req, res) => {
     try {
-        const { question, answer, session } = req.body;
+        const { question, answer } = req.body;
         const chatMessage = new chatbotModel({
             question: question,
-            answer: answer || '', // Can be empty initially
-            session: session || generateSessionId()
+            answer: answer || '',
+            userId: req.session.userId
         });
 
         const savedMessage = await chatMessage.save();
@@ -37,11 +37,9 @@ exports.saveMessageInDatabase = async (req, res) => {
 
 exports.loadChatHistory = async (req, res) => {
     try {
-        const { sessionId } = req.params;
-
         const messages = await chatbotModel.find({
-            session: sessionId
-        }).sort({ createdAt: 1 }); // Sort by creation time, oldest first
+            userId: req.session.userId
+        }).sort({ createdAt: 1 });
 
         res.json(messages);
     } catch (error) {
