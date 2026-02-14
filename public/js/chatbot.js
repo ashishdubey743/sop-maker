@@ -23,7 +23,7 @@ class ChatBot {
 
             if (response.ok) {
                 const emptyState = document.getElementById('emptyState');
-                
+
 
                 const messages = await response.json();
 
@@ -187,17 +187,9 @@ class ChatBot {
         typingDiv.id = 'typingIndicator';
         typingDiv.className = 'message mb-6';
         typingDiv.innerHTML = `
-            <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-robot text-white text-sm"></i>
-                </div>
-                <div class="bg-blue-50 rounded-2xl rounded-tl-none px-4 py-3">
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
+           <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 border-2 border-primary border-t-purple-600 rounded-full animate-spin"></div>
+                <span class="font-bold text-lg text-black">Thinking...</span>
             </div>
         `;
         chatContainer.appendChild(typingDiv);
