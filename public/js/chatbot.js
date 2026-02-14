@@ -23,6 +23,7 @@ class ChatBot {
 
             if (response.ok) {
                 const emptyState = document.getElementById('emptyState');
+                
 
                 const messages = await response.json();
 
@@ -217,7 +218,7 @@ class ChatBot {
      * Add message to chat container.
      */
     addMessage(text, sender, filename = null) {
-        const chatContainer = document.getElementById('chatContainer');
+        const chatContainer = document.getElementById('chatContainerContent');
         const now = new Date();
         const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -291,9 +292,9 @@ class ChatBot {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log("Chat cleared!", result);
-                // Optionally reload the chat interface or reset the chat state
-                // For example: this.loadChatHistory();
+                this.loadChatHistory();
+                const chatContainerContent = document.getElementById('chatContainerContent');
+                chatContainerContent.style.display = 'none';
             } else {
                 console.error("Failed to clear chat:", response.status);
             }
