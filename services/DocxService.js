@@ -119,20 +119,6 @@ class DocxService {
               children: [new TextRun({ text: "", break: 1 })],
             }),
 
-            // Table of Contents placeholder
-            new Paragraph({
-              text: "Table of Contents",
-              heading: HeadingLevel.HEADING_1,
-              spacing: { after: 200 },
-            }),
-
-            new Paragraph({
-              text: "[Table of Contents will be generated automatically in Word]",
-              italics: true,
-              color: "666666",
-              spacing: { after: 400 },
-            }),
-
             // Main content
             ...contentElements,
 

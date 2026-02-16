@@ -1,74 +1,178 @@
 require('dotenv').config();
 
 class ChatbotService {
-    getPrompt({ message, style }) {
-        return `
-        CRITICAL INSTRUCTION: You MUST analyze if the user's SOP request involves DATA STORAGE or DATABASE OPERATIONS.
-        
-        User's request: "${message}"
-        
-        FIRST, analyze: Does this SOP need a database table? Look for these clues:
-        1. Mentions of: data, records, information, storage, database, table, fields, columns
-        2. Processes involving: user data, transactions, logs, tracking, inventory, approvals
-        3. Keywords: store, save, record, track, monitor, log, database, table, schema
-        
-        If YES, include a DATABASE TABLE SCHEMA section with relevant columns.
-        If NO, skip the database section.
-        
-        Generate the SOP in this structure:
-        
-        ${style === 'detailed' ? `
-        # 📋 SOP: [Appropriate Title]
-        
-        ## 📊 DATABASE TABLE SCHEMA (Only if needed!)
-        If this process involves data storage, create a table like this:
-        | Column | Type | Description | Sample Data |
-        |--------|------|-------------|-------------|
-        | [Relevant column] | [Appropriate type] | [Clear description] | [Example value] |
-        
-        ### 1. 🎯 PURPOSE
-        ### 2. 📌 SCOPE
-        ### 3. 👥 RESPONSIBILITIES
-        ### 4. 🔄 PROCEDURE STEPS
-        ### 5. ⚠️ QUALITY CHECKS
-        ` : `
-        # 📋 [Procedure Name]
-        
-        **🎯 Purpose:** [Why]
-        **👥 Responsible:** [Who]
-        
-        **🔄 Steps:**
-        1. [Step 1]
-        2. [Step 2]
-        3. [Step 3]
-        
-        ${style === 'standard' ? `
-        **📊 Database Table (if needed):**
-        | Column | Type | Description |
-        |--------|------|-------------|
-        | [column] | [type] | [description] |` : ''}
-        `}
-        
-        IMPORTANT RULES for Database Tables:
-        1. ONLY create tables if the SOP clearly involves data storage
-        2. Columns should be RELEVANT to the specific process
-        3. Use appropriate data types: VARCHAR, INT, BOOLEAN, TIMESTAMP, etc.
-        4. Include Primary Key (id) and timestamps if applicable
-        5. Make columns SPECIFIC to the use case
-        
-        Example: If SOP is about "User Registration", table might have:
-        | Column | Type | Description |
-        |--------|------|-------------|
-        | id | INT | Primary Key |
-        | username | VARCHAR(50) | User's login name |
-        | email | VARCHAR(100) | User's email |
-        | created_at | TIMESTAMP | Registration time |
-        
-        DO NOT use hardcoded or pre-defined tables. Create FRESH tables based on context.
-        
-        Now generate the SOP for: "${message}"
-        `;
-    }
+   getPrompt({ message, style }) {
+    return `
+You are a Senior Technical Architect and SOP Documentation Expert.
+
+CRITICAL ANALYSIS STEP:
+Before writing the SOP, analyze whether the process:
+- Involves data storage
+- Affects database tables
+- Requires backend services
+- Touches internal/external systems
+- Requires infra dependencies
+
+User Request:
+"${message}"
+
+==================================================
+📋 OUTPUT STRUCTURE (MANDATORY)
+==================================================
+
+# 📋 SOP: [Generate Proper Technical Title]
+
+---
+
+## 1️⃣ Purpose
+Clearly explain why this SOP exists.
+
+---
+
+## 2️⃣ Scope
+
+### 2.1 Systems Involved
+List all systems involved:
+- Backend services
+- APIs
+- Database
+- External services
+- UI
+- Queue systems
+
+### 2.2 Tables / Services Affected
+Explicitly list:
+- Database tables impacted
+- Microservices impacted
+- Event queues involved
+- Cron jobs affected
+
+---
+
+## 3️⃣ Responsibilities
+Define roles:
+- Developer
+- DevOps
+- QA
+- Product
+- Support
+
+---
+
+## 4️⃣ Architecture Overview
+
+Provide a high-level flow explanation.
+
+Then generate a text-based flow diagram like:
+
+User → API → Service Layer → Database  
+                ↓  
+             Queue → Worker → External Service  
+
+Use proper arrows and indentation.
+
+---
+
+## 5️⃣ Prerequisites
+
+List required setup:
+
+- Access permissions
+- DB credentials
+- Required ENV variables
+- Required Git branch
+- Required file format (if applicable)
+- Feature flags (if applicable)
+
+---
+
+## 6️⃣ Dependencies
+
+### Internal Services
+Mention if relevant:
+- Auth Service
+- Vendor Service
+- Queue Service
+- Notification Service
+- Analytics Service
+
+### External Services
+Mention if relevant:
+- AWS S3
+- Redis
+- Aurora MySQL
+- Slack Webhook
+- Third-party APIs
+
+Only include services that are contextually required.
+
+---
+
+## 7️⃣ Data Model / Tables Affected (Only if applicable)
+
+If the process stores or modifies data,
+create fresh database tables relevant to this use case.
+
+Use this structure:
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | BIGINT | PK, Auto Increment | Primary Key |
+| ... | ... | ... | ... |
+
+Rules:
+- Always include Primary Key
+- Add created_at / updated_at if relevant
+- Use proper SQL types
+- Do NOT reuse generic template tables
+- Columns must be contextual
+
+If NO database is involved, write:
+"⚠️ No persistent data storage involved."
+
+---
+
+## 8️⃣ Procedure Steps
+
+Write detailed step-by-step execution process.
+
+If deployment related:
+Include rollback steps.
+
+If DB related:
+Include backup instructions.
+
+---
+
+## 9️⃣ Quality Checks / Validation
+
+- Logs to verify
+- DB validation query
+- API response validation
+- Monitoring checks
+
+---
+
+## 🔟 Rollback Plan (If applicable)
+
+Explain how to revert safely.
+
+---
+
+IMPORTANT RULES:
+
+1. Do NOT hallucinate unnecessary systems.
+2. Only include dependencies that logically apply.
+3. Only create DB tables if data persistence is required.
+4. Keep structure consistent and enterprise-grade.
+5. Be technical, not generic.
+
+Now generate the SOP for:
+
+"${message}"
+`;
+}
+
 
     getTableAnalysisPrompt() {
         return `You are an expert SOP writer and database architect. 
