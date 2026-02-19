@@ -169,17 +169,39 @@
                 // User is authenticated, load the app
                 console.log('Welcome', user.name);
 
-                // Add user info to UI
-                const userElement = document.createElement('div');
-                userElement.innerHTML = `
-            <div style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                👤 ${user.name}
-                <button onclick="logout()" style="margin-left: 10px; background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                    Logout
-                </button>
-            </div>
-        `;
-                document.body.appendChild(userElement);
+                // Create the three-dots menu button
+                const menuButton = document.createElement('button');
+                menuButton.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+                menuButton.setAttribute('style', 'position: fixed; top: 10px; right: 10px; background: white; border: none; padding: 10px; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; z-index: 1000; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;');
+                menuButton.setAttribute('id', 'userMenuButton');
+                menuButton.setAttribute('aria-label', 'User menu');
+
+                // Create the dropdown menu
+                const dropdown = document.createElement('div');
+                dropdown.setAttribute('id', 'userDropdown');
+                dropdown.setAttribute('style', 'position: fixed; top: 60px; right: 10px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 150px; z-index: 1001; display: none;');
+                dropdown.innerHTML = `
+                    <div style="padding: 8px; border-bottom: 1px solid #eee; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        ${user.name || user.email}
+                    </div>
+                    <button onclick="logout()" style="display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px; color: #ff4444; cursor: pointer; border-radius: 4px; font-size: 14px;">
+                        Logout
+                    </button>
+                `;
+
+                document.body.appendChild(menuButton);
+                document.body.appendChild(dropdown);
+
+                // Toggle dropdown on button click
+                menuButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    dropdown.style.display = 'none';
+                });
             }
         });
 
