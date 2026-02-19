@@ -53,7 +53,7 @@ class ChatBot {
      */
     initializeEventListeners() {
         document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
                 this.sendMessage();
             }
         });
