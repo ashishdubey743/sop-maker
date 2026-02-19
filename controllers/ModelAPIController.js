@@ -44,20 +44,31 @@ exports.ChatWithAIModel = async (req, res) => {
         }
 
         const data = await response.json();
-        const sopContent = data.choices?.[0]?.message?.content || "No response from AI";
-        const sopTitle = chatbotService.getContentTitle(sopContent).replace(/[#$@%]/g, '');
-        try {
-            const docBuffer = await docxService.createSopDocument(sopContent, sopTitle);
-            const fileName = await docxService.saveDocumentToFile(docBuffer, `./storage/temp/`, `${sopTitle.replace(/\s+/g, '_')}.docx`);
+        let sopContent = data.choices?.[0]?.message?.content || "No response from AI";
+        if (!sopContent.includes('SOP was not required for this query.')) {
+            const sopTitle = chatbotService.getContentTitle(sopContent).replace(/[#$@%]/g, '');
+            try {
+                const docBuffer = await docxService.createSopDocument(sopContent, sopTitle);
+                const fileName = await docxService.saveDocumentToFile(docBuffer, `./storage/temp/`, `${sopTitle.replace(/\s+/g, '_')}.docx`);
+                res.json({
+                    success: true,
+                    content: sopContent,
+                    docPath: fileName,
+                    botResponse: `✅ SOP "${sopTitle}" created Successfully`,
+                    sopTitle: sopTitle,
+                });
+            } catch (error) {
+                console.error('Error creating document:', error);
+            }
+        } else {
+            sopContent = sopContent.replace('SOP was not required for this query.', '').trim();
             res.json({
                 success: true,
                 content: sopContent,
-                docPath: fileName,
-                botResponse: `✅ SOP "${sopTitle}" created Successfully`,
-                sopTitle: sopTitle,
+                docPath: null,
+                botResponse: sopContent,
+                sopTitle: null,
             });
-        } catch (error) {
-            console.error('Error creating document:', error);
         }
     } catch (error) {
         console.error('Error:', error);
