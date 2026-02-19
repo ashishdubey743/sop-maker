@@ -3,8 +3,8 @@ const { nanoid } = require('nanoid');
 require('dotenv').config();
 
 class ChatbotService {
-getPrompt({ message, style }) {
-    return `
+    getPrompt({ message, style }) {
+        return `
 You are a Principal Systems Architect and Enterprise SOP Author.
 
 You are NOT allowed to generate generic documentation.
@@ -35,7 +35,7 @@ You MUST perform classification internally.
 
 You are STRICTLY FORBIDDEN from:
 - Mentioning the category (A, B, C, or D)
-- Saying “This is Category X”
+- Saying "This is Category X"
 - Explaining why a category was selected
 - Printing any reasoning
 - Printing technical classification
@@ -220,13 +220,13 @@ State reason explicitly.
 7. If vague request, state architectural assumptions clearly.
 
 `;
-}
+    }
 
 
 
 
-getTableAnalysisPrompt() {
-    return `
+    getTableAnalysisPrompt() {
+        return `
 You are a database architect.
 
 Your job is NOT to create tables automatically.
@@ -248,14 +248,14 @@ Return:
 Never generate unnecessary tables.
 Never use generic placeholder schema.
 `;
-}
+    }
 
 
     getContentTitle(content) {
         const titleMatch = content.match(/^#\s*(.+?)(?:\n|$)/) ||
             content.match(/SOP:\s*(.+?)(?:\n|$)/i) ||
             content.match(/📋\s*(.+?)(?:\n|$)/);
-        
+
         return titleMatch ? titleMatch[1].replace('📋', '').trim() : `SOP - ${nanoid()}`;
     }
 }
