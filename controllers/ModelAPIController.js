@@ -45,7 +45,7 @@ exports.ChatWithAIModel = async (req, res) => {
 
         const data = await response.json();
         const sopContent = data.choices?.[0]?.message?.content || "No response from AI";
-        const sopTitle = chatbotService.getContentTitle(sopContent);
+        const sopTitle = chatbotService.getContentTitle(sopContent).replace(/[#$@%]/g, '');
         try {
             const docBuffer = await docxService.createSopDocument(sopContent, sopTitle);
             const fileName = await docxService.saveDocumentToFile(docBuffer, `./storage/temp/`, `${sopTitle.replace(/\s+/g, '_')}.docx`);

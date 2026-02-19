@@ -163,7 +163,8 @@ class DocxService {
     let i = 0;
 
     while (i < lines.length) {
-      const line = lines[i].trim();
+      const rawLine = lines[i];
+      const line = rawLine.trim();
 
       if (!line) {
         i++;
@@ -254,22 +255,31 @@ class DocxService {
     const items = [];
     let i = startIndex;
 
-    while (i < lines.length && lines[i].trim().match(/^\d+\.\s/)) {
-      const text = lines[i].trim().replace(/^\d+\.\s+/, '');
+    while (i < lines.length && lines[i].match(/^\s*\d+\.\s/)) {
+
+      const rawLine = lines[i];
+
+      const indentMatch = rawLine.match(/^(\s*)/);
+      const indentSpaces = indentMatch ? indentMatch[1].length : 0;
+
+      const level = Math.floor(indentSpaces / 2);
+
+      const text = rawLine.trim().replace(/^\d+\.\s+/, '');
+
       items.push(
         new Paragraph({
-          children: [
-            new TextRun({ text: "•\t", bullet: { level: 0 } }),
-            new TextRun(text),
-          ],
+          text: text,
+          numbering: { reference: "numbered-list", level: level },
           spacing: { before: 50, after: 50 },
         })
       );
+
       i++;
     }
 
     return { items, nextIndex: i };
   }
+
 
   /**
    * Parse bullet list
@@ -278,22 +288,33 @@ class DocxService {
     const items = [];
     let i = startIndex;
 
-    while (i < lines.length && lines[i].trim().match(/^[-*•]\s/)) {
-      const text = lines[i].trim().substring(2).trim();
+    while (i < lines.length && lines[i].match(/^\s*[-*•]\s/)) {
+
+      const rawLine = lines[i];
+
+      // Count leading spaces
+      const indentMatch = rawLine.match(/^(\s*)/);
+      const indentSpaces = indentMatch ? indentMatch[1].length : 0;
+
+      // Every 2 spaces = next level (adjust if needed)
+      const level = Math.floor(indentSpaces / 2);
+
+      const text = rawLine.trim().substring(2).trim();
+
       items.push(
         new Paragraph({
-          children: [
-            new TextRun({ text: "•\t", bullet: { level: 0 } }),
-            new TextRun(text),
-          ],
+          text: text,
+          bullet: { level: level },
           spacing: { before: 50, after: 50 },
         })
       );
+
       i++;
     }
 
     return { items, nextIndex: i };
   }
+
 
   /**
    * Check if line looks like part of a table
@@ -394,36 +415,22 @@ class DocxService {
       return { elements: null, nextIndex: startIndex + 1 };
     }
 
-    const codeBlock = new Paragraph({
-      children: [
-        new TextRun({
-          text: codeLines.join('\n'),
-          font: "Courier New",
-          size: 20, // 10pt
-          color: "2E8B57",
-        }),
-      ],
-      shading: {
-        fill: "F5F5F5",
-        type: ShadingType.CLEAR,
-      },
-      border: {
-        top: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
-        bottom: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
-        left: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
-        right: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
-      },
-      spacing: { before: 100, after: 100 },
-    });
+    const codeParagraphs = codeLines.map(line =>
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: line,
+            font: "Courier New",
+            size: 20,
+            color: "2E8B57",
+          }),
+        ],
+        spacing: { before: 0, after: 0 },
+      })
+    );
 
-    const languageLabel = new Paragraph({
-      text: `Code (${language}):`,
-      italics: true,
-      color: "666666",
-      spacing: { after: 0 },
-    });
+    return { elements: codeParagraphs, nextIndex: i + 1 };
 
-    return { elements: [languageLabel, codeBlock], nextIndex: i + 1 };
   }
 
   /**
@@ -514,7 +521,7 @@ class DocxService {
    * Save document to file (optional helper)
    */
   async saveDocumentToFile(buffer, folder, filename) {
-    filename = nanoid()+'_'+filename;
+    filename = nanoid() + '_' + filename;
     await fs.mkdir(folder, { recursive: true });
     const filePath = path.join(folder, filename);
     await fs.writeFile(filePath, buffer);

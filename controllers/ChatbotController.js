@@ -50,6 +50,7 @@ exports.loadChatHistory = async (req, res) => {
 exports.downloadSOP = async (req, res) => {
     try {
         const { filename } = req.params;
+        console.log(filename)
         let chatbotRecord = await chatbotModel.find({ docPath: filename });
         const path = 'storage/temp/' + chatbotRecord[0].docPath;
 
