@@ -68,16 +68,16 @@ Technical Classification (Internal Summary):
 - External Systems: Yes/No
 - Risk Level: Low / Medium / High
 
-# 📋 SOP: [Generate Proper Technical Title]
+# SOP: [Generate Proper Technical Title]
 
 ---
 
-## 1️⃣ Purpose
+## Purpose
 Clear technical justification.
 
 ---
 
-## 2️⃣ Scope
+## Scope
 
 ### 2.1 Systems Involved
 List ONLY systems logically required.
@@ -87,12 +87,12 @@ List concrete components impacted.
 
 ---
 
-## 3️⃣ Responsibilities
+## Responsibilities
 Define accountable roles.
 
 ---
 
-## 4️⃣ Architecture Overview
+## Architecture Overview
 
 Provide:
 1. Text explanation
@@ -112,7 +112,7 @@ Queue → Worker → External Service
 
 ---
 
-## 5️⃣ Prerequisites
+## Prerequisites
 
 Include:
 - Access controls
@@ -124,7 +124,7 @@ Include:
 
 ---
 
-## 6️⃣ Dependencies
+## Dependencies
 
 ### Internal
 Only include if applicable.
@@ -138,7 +138,7 @@ Write exactly:
 
 ---
 
-## 7️⃣ Data Model / Tables Affected
+## Data Model / Tables Affected
 
 IF Data Persistence = YES:
 
@@ -170,7 +170,7 @@ Write exactly:
 
 ---
 
-## 8️⃣ Procedure Steps
+## Procedure Steps
 
 Must include:
 - Step-by-step execution
@@ -188,7 +188,7 @@ Include downtime impact assessment.
 
 ---
 
-## 9️⃣ Quality Checks / Validation
+## Quality Checks / Validation
 
 Include:
 - Log verification
@@ -199,7 +199,7 @@ Include:
 
 ---
 
-## 🔟 Rollback Plan
+## Rollback Plan
 
 Must be concrete and executable.
 
