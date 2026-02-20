@@ -31,7 +31,7 @@ class ChatBot {
                     input.value = userText;
                 }
                 magicBtn.disabled = false;
-                magicBtn.innerHTML = '<i class="fas fa-hat-wizard fa-lg"></i>';
+                magicBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles text-lg"></i>';
             };
         }
     }
@@ -162,44 +162,49 @@ class ChatBot {
     }
 
     /**
+     * Validate user input before sending to chatbot.
+     */
+    validateInput = () => {
+        const input = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendButton');
+        const magicSOPButton = document.getElementById('magicSOPButton');
+        const validation = document.getElementById('inputValidation');
+        const text = input.value.trim();
+        const minLength = 10;
+        const isValidLength = text.length >= minLength;
+
+        if (!isValidLength) {
+            validation.classList.remove('hidden');
+            sendBtn.disabled = true;
+            magicSOPButton.disabled = true;
+            return false;
+        }
+
+        validation.classList.add('hidden');
+        sendBtn.disabled = false;
+        magicSOPButton.disabled = false;
+        return true;
+    };
+
+    /**
      * Initialize event listeners.
      */
     initializeEventListeners() {
         const input = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendButton');
-        const validation = document.getElementById('inputValidation');
-
-        const minLength = 10;
-
-        const validateInput = () => {
-            const text = input.value.trim();
-
-            const isValidLength = text.length >= minLength;
-
-            if (!isValidLength) {
-                validation.classList.remove('hidden');
-                sendBtn.disabled = true;
-                return false;
-            }
-
-            validation.classList.add('hidden');
-            sendBtn.disabled = false;
-            return true;
-        };
-
-        input.addEventListener('input', validateInput);
+        input.addEventListener('input', this.validateInput);
 
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                if (validateInput()) {
+                if (this.validateInput()) {
                     this.sendMessage();
                 }
             }
         });
 
         sendBtn.onclick = () => {
-            if (validateInput()) {
+            if (this.validateInput()) {
                 this.sendMessage();
             }
         };
