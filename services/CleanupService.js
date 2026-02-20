@@ -1,3 +1,5 @@
+const connectDB = require('../database/connection');
+const Chatbot = require('../models/Chatbot');
 const fs = require('fs').promises;
 const path = require('path');
 const cron = require('node-cron');
@@ -44,12 +46,23 @@ class CleanupService {
         }
     }
 
+    async cleanupChatbotMessages() {
+        try {
+            await connectDB();
+            const result = await Chatbot.deleteMany({});
+            console.log(`[${new Date().toISOString()}] Deleted ${result.deletedCount} chatbot messages from database.`);
+        } catch (error) {
+            console.error('Error deleting chatbot messages:', error);
+        }
+    }
+
     scheduleCleanup() {
-        // Schedule cleanup every day at 11:45 PM
+        // Schedule cleanup every day at 11:00 PM
         // cron format: minute hour day month day-of-week
-        cron.schedule('37 15 * * *', () => {
+        cron.schedule('15 03 * * *', async () => {
             console.log(`[${new Date().toISOString()}] Running scheduled cleanup...`);
-            this.cleanupTempFiles();
+            await this.cleanupTempFiles();
+            await this.cleanupChatbotMessages();
         });
     }
 }
