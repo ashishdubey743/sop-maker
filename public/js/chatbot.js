@@ -9,9 +9,33 @@ class ChatBot {
     constructor() {
         this.lastMessageId = '';
         this.coversationAvailable = false;
+        this.suggestedQuestions = [];
         this.currentSession = this.getCurrentSession();
         this.initializeEventListeners();
+        this.loadSuggestions();
         this.loadChatHistory();
+    }
+
+    /**
+     * Load suggested questions from a JSON file
+     */
+    async loadSuggestions() {
+        try {
+            const resp = await fetch('/json/suggestions.json');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (Array.isArray(data)) {
+                    this.suggestedQuestions = data;
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load suggestions.json:', err);
+        }
+        
+        const emptyState = document.getElementById('emptyState');
+        if (emptyState && emptyState.style.display !== 'none') {
+            this.renderSuggestedQuestions();
+        }
     }
 
     /**
@@ -41,11 +65,50 @@ class ChatBot {
                     });
                 } else {
                     emptyState.style.display = 'flex';
+                    this.renderSuggestedQuestions();
                 }
             }
         } catch (error) {
             console.error('Error loading chat history:', error);
         }
+    }
+
+    /**
+     * Render suggested questions in the empty state and attach click handlers.
+     */
+    renderSuggestedQuestions() {
+        const emptyState = document.getElementById('emptyState');
+        console.log('Empty state element:', emptyState);
+        if (!emptyState) return;
+
+        const block = document.getElementById('suggestionsBlock');
+        const list = document.getElementById('suggestionsList');
+        const template = document.getElementById('suggestionTemplate');
+        if (!block || !list || !template) return;
+
+        // Clear any existing suggestion nodes
+        list.innerHTML = '';
+        console.log('Rendering suggested questions:', this.suggestedQuestions);
+        if (!this.suggestedQuestions || this.suggestedQuestions.length === 0) {
+            block.classList.add('hidden');
+            return;
+        }
+
+        this.suggestedQuestions.forEach(q => {
+            const btn = template.cloneNode(true);
+            btn.removeAttribute('id');
+            btn.classList.remove('hidden');
+            btn.textContent = q;
+            btn.addEventListener('click', () => {
+                const input = document.getElementById('messageInput');
+                input.value = q;
+                emptyState.style.display = 'none';
+                this.sendMessage();
+            });
+            list.appendChild(btn);
+        });
+
+        block.classList.remove('hidden');
     }
 
     /**
