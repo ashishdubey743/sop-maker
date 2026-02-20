@@ -14,6 +14,7 @@ class ChatBot {
         this.initializeEventListeners();
         this.loadSuggestions();
         this.loadChatHistory();
+        this.loading = false;
     }
 
     /**
@@ -31,7 +32,7 @@ class ChatBot {
         } catch (err) {
             console.error('Failed to load suggestions.json:', err);
         }
-        
+
         const emptyState = document.getElementById('emptyState');
         if (emptyState && emptyState.style.display !== 'none') {
             this.renderSuggestedQuestions();
@@ -115,13 +116,44 @@ class ChatBot {
      * Initialize event listeners.
      */
     initializeEventListeners() {
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+        const input = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendButton');
+        const validation = document.getElementById('inputValidation');
+
+        const minLength = 10;
+
+        const validateInput = () => {
+            const text = input.value.trim();
+
+            const isValidLength = text.length >= minLength;
+
+            if (!isValidLength) {
+                validation.classList.remove('hidden');
+                sendBtn.disabled = true;
+                return false;
+            }
+
+            validation.classList.add('hidden');
+            sendBtn.disabled = false;
+            return true;
+        };
+
+        input.addEventListener('input', validateInput);
+
+        input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
-                this.sendMessage();
+                e.preventDefault();
+                if (validateInput()) {
+                    this.sendMessage();
+                }
             }
         });
 
-        document.querySelector('button[onclick="chatbot.sendMessage()"]').onclick = () => this.sendMessage();
+        sendBtn.onclick = () => {
+            if (validateInput()) {
+                this.sendMessage();
+            }
+        };
     }
 
     /**
@@ -131,7 +163,7 @@ class ChatBot {
         const input = document.getElementById('messageInput');
         const message = input.value.trim();
 
-        if (message === '') return;
+        if (message.length < 10 || this.loading) return;
         const emptyState = document.getElementById('emptyState');
         emptyState.style.display = 'none';
         this.addMessage(message, 'user');
@@ -245,6 +277,7 @@ class ChatBot {
      * Show typing indicator.
      */
     showTypingIndicator() {
+        this.loading = true;
         const chatContainer = document.getElementById('chatContainer');
         const typingDiv = document.createElement('div');
         typingDiv.id = 'typingIndicator';
@@ -263,6 +296,7 @@ class ChatBot {
      * Hide typing indicator.
      */
     hideTypingIndicator() {
+        this.loading = false;
         const typingIndicator = document.getElementById('typingIndicator');
         if (typingIndicator) {
             typingIndicator.remove();

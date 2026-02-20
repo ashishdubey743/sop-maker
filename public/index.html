@@ -139,10 +139,17 @@
                     <textarea id="messageInput" placeholder="Type your message here..." rows="3"
                         class="w-full bg-white border border-slate-300 rounded-2xl py-3 px-5 pr-20 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 resize-y min-h-[60px] max-h-[160px] shadow-sm transition-all duration-200"></textarea>
 
-                    <button onclick="chatbot.sendMessage()"
-                        class="absolute right-4 bottom-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white h-12 w-12 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center">
+                    <button id="sendButton" onclick="chatbot.sendMessage()" disabled
+                        class="absolute right-4 bottom-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white h-12 w-12 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed">
                         <i class="fas fa-paper-plane"></i>
                     </button>
+                </div>
+
+                <!-- Validation & Counter -->
+                <div class="flex justify-between items-center mt-2 px-2">
+                    <p id="inputValidation" class="text-xs text-red-500 hidden">
+                        10 characters minimum required
+                    </p>
                 </div>
             </div>
 
