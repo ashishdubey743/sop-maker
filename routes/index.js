@@ -3,6 +3,12 @@ const router = express.Router();
 
 const { isAuthenticated } = require('@middlewares/authMiddleware');
 const authRoutes = require('@routes/authRoutes');
+const MagicSOPController = require('@controllers/MagicSOPController');
+
+/**
+ * Magic SOP Query
+ */
+router.post('/api/magic-sop', isAuthenticated, MagicSOPController.magicSOP);
 const ModelAPIController = require('@controllers/ModelAPIController');
 const ChatbotController = require('@controllers/ChatbotController');
 const path = require('path');

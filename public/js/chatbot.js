@@ -2,6 +2,39 @@
  * ChatBot class.
  */
 class ChatBot {
+    /**
+     * Initialize magic SOP icon click handler
+     */
+    initializeMagicSOPButton() {
+        const magicBtn = document.getElementById('magicSOPButton');
+        const input = document.getElementById('messageInput');
+        if (magicBtn && input) {
+            magicBtn.onclick = async () => {
+                const userText = input.value.trim();
+                if (!userText) return;
+                magicBtn.disabled = true;
+                magicBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                try {
+                    // Call backend to convert to SOP query
+                    const resp = await fetch('/api/magic-sop', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: userText })
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        input.value = data.sopQuery || userText;
+                    } else {
+                        input.value = userText;
+                    }
+                } catch (err) {
+                    input.value = userText;
+                }
+                magicBtn.disabled = false;
+                magicBtn.innerHTML = '<i class="fas fa-hat-wizard fa-lg"></i>';
+            };
+        }
+    }
 
     /**
      * Constructor.
@@ -14,6 +47,7 @@ class ChatBot {
         this.initializeEventListeners();
         this.loadSuggestions();
         this.loadChatHistory();
+        this.initializeMagicSOPButton();
         this.loading = false;
     }
 
