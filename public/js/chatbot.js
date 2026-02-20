@@ -1,3 +1,25 @@
+// Maximize input area logic
+document.addEventListener('DOMContentLoaded', () => {
+    const maximizeBtn = document.getElementById('maximizeInputBtn');
+    const input = document.getElementById('messageInput');
+    if (maximizeBtn && input) {
+        maximizeBtn.addEventListener('click', () => {
+            if (!input.classList.contains('maximized')) {
+                input.style.maxHeight = '400px';
+                input.style.height = '400px';
+                input.classList.add('maximized');
+                maximizeBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                maximizeBtn.title = 'Shrink input area';
+            } else {
+                input.style.maxHeight = '160px';
+                input.style.height = '';
+                input.classList.remove('maximized');
+                maximizeBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                maximizeBtn.title = 'Expand input area';
+            }
+        });
+    }
+});
 /**
  * ChatBot class.
  */
