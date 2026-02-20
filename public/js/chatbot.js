@@ -64,6 +64,10 @@ class ChatBot {
                             this.addMessage(msg.answer, 'bot', msg.docPath);
                         }
                     });
+                    // Scroll to very bottom after loading chat history
+                    setTimeout(() => {
+                        this.moveToBottom();
+                    }, 100);
                 } else {
                     emptyState.style.display = 'flex';
                     this.renderSuggestedQuestions();
@@ -74,6 +78,17 @@ class ChatBot {
         }
     }
 
+    /**
+     * Move the user to the bottom of the chat container to see the latest messages.
+     */
+    moveToBottom() {
+        const chatContainer = document.getElementById('chatContainer');
+        const chatContent = document.getElementById('chatContainerContent');
+        if (chatContent && chatContainer) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+    }
     /**
      * Render suggested questions in the empty state and attach click handlers.
      */
