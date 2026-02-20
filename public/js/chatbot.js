@@ -181,6 +181,11 @@ class ChatBot {
         if (message.length < 10 || this.loading) return;
         const emptyState = document.getElementById('emptyState');
         emptyState.style.display = 'none';
+        // Ensure chat container is visible after clear
+        const chatContainerContent = document.getElementById('chatContainerContent');
+        if (chatContainerContent) {
+            chatContainerContent.style.display = 'block';
+        }
         this.addMessage(message, 'user');
         // Save user message and get the document ID
         this.saveMessageInDatabase({
@@ -206,6 +211,10 @@ class ChatBot {
                 docPath: docPath
             });
 
+            // Ensure chat container is visible before adding bot message
+            if (chatContainerContent) {
+                chatContainerContent.style.display = 'block';
+            }
             this.addMessage(botResponse, 'bot', docPath);
         });
     }
@@ -400,7 +409,10 @@ class ChatBot {
                 const result = await response.json();
                 this.loadChatHistory();
                 const chatContainerContent = document.getElementById('chatContainerContent');
-                chatContainerContent.style.display = 'none';
+                if (chatContainerContent) {
+                    chatContainerContent.innerHTML = '';
+                    chatContainerContent.style.display = 'none';
+                }
             } else {
                 console.error("Failed to clear chat:", response.status);
             }
