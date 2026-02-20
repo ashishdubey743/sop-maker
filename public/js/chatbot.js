@@ -490,4 +490,22 @@ class ChatBot {
  */
 document.addEventListener('DOMContentLoaded', () => {
     window.chatbot = new ChatBot();
+
+    // Show cleanup notification every login
+    const popup = document.getElementById('cleanupNotification');
+    const closeBtn = document.getElementById('closeCleanupNotification');
+    if (popup && closeBtn) {
+        console.log(localStorage.getItem('cleanupNotificationShown'));
+        if (!localStorage.getItem('cleanupNotificationShown')) {
+            popup.classList.remove('hidden');
+            localStorage.setItem('cleanupNotificationShown', 'true');
+        }
+        closeBtn.onclick = () => {
+            popup.classList.add('hidden');
+        };
+
+        setInterval(() => {
+            localStorage.removeItem('cleanupNotificationShown');
+        }, 6 * 60 * 60 * 1000); // Reset every 6 hours
+    }
 });
