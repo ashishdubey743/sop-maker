@@ -45,7 +45,24 @@ exports.ChatWithAIModel = async (req, res) => {
 
         const data = await response.json();
         let sopContent = data.choices?.[0]?.message?.content || "No response from AI";
-        if (!sopContent.includes('SOP was not required for this query.')) {
+        // Helper: detect if response is an SOP (has key SOP section headers)
+        function isLikelySOP(text) {
+            const headers = [
+                /#\s*SOP[:\s]/i,
+                /##\s*Purpose/i,
+                /##\s*Scope/i,
+                /##\s*Responsibilities/i,
+                /##\s*Architecture Overview/i,
+                /##\s*Procedure Steps/i
+            ];
+            let found = 0;
+            for (const h of headers) {
+                if (h.test(text)) found++;
+            }
+            return found >= 2; // At least 2 key sections
+        }
+
+        if (!sopContent.includes('SOP was not required for this query.') && isLikelySOP(sopContent)) {
             const sopTitle = chatbotService.getContentTitle(sopContent).replace(/[#$@%]/g, '');
             try {
                 const docBuffer = await docxService.createSopDocument(sopContent, sopTitle);
