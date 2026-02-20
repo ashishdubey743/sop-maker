@@ -34,6 +34,9 @@ exports.magicSOP = async (req, res) => {
 
         const data = await response.json();
         const sopQuery = data.choices?.[0]?.message?.content || text;
+        if (sopQuery.includes('[specific task or operation]')) {
+            sopQuery = text; // Fallback to original if AI fails to rewrite properly
+         }
         res.json({ sopQuery });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });

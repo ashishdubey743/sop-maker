@@ -136,15 +136,15 @@
             <!-- Input Area -->
             <div class="border-t border-slate-200/60 p-4 bg-white/70 backdrop-blur-md">
                 <div class="relative">
-                    <textarea id="messageInput" placeholder="Type your message here..." rows="3"
-                        class="w-full bg-white border border-slate-300 rounded-2xl py-3 px-5 pr-20 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 resize-y min-h-[60px] max-h-[160px] shadow-sm transition-all duration-200"></textarea>
+                    <input id="messageInput" style="padding-left: 3.5rem; padding-right: 9rem;" placeholder="Type your message here..." rows="3"
+                        class="w-full bg-white border border-slate-300 rounded-2xl py-3 px-5 pr-20 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 resize-y min-h-[60px] max-h-[160px] shadow-sm transition-all duration-200"></input>
 
                     <!-- Maximize Button -->
-                    <button id="maximizeInputBtn" type="button" class="absolute left-2 bottom-6 bg-slate-200 hover:bg-indigo-200 text-indigo-700 rounded-full p-2 shadow transition-all duration-200" title="Expand input area">
+                    <button id="maximizeInputBtn" type="button" class="absolute left-2 bottom-2 bg-slate-200 hover:bg-indigo-200 text-indigo-700 rounded-full p-2 shadow transition-all duration-200" title="Expand input area">
                         <i class="fas fa-expand"></i>
                     </button>
 
-                    <div class="absolute right-20 bottom-6 group">
+                    <div class="absolute right-20 bottom-1 group">
 
                         <!-- Magic Button -->
                         <button id="magicSOPButton" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white h-12 w-12 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" disabled
@@ -166,7 +166,7 @@
                     </div>
 
                     <button id="sendButton" onclick="chatbot.sendMessage()" disabled
-                        class="absolute right-4 bottom-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white h-12 w-12 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed">
+                        class="absolute right-4 bottom-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white h-12 w-12 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
