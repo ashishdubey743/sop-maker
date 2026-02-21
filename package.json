@@ -21,7 +21,9 @@
     "mongoose-delete": "^1.0.7",
     "nanoid": "^5.1.6",
     "node-cron": "^4.2.1",
-    "serve-favicon": "^2.5.1"
+    "serve-favicon": "^2.5.1",
+    "sitemap": "^9.0.0",
+    "sitemap-generator": "^8.5.1"
   },
   "_moduleAliases": {
     "@controllers": "controllers",
