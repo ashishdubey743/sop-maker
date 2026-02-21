@@ -1,101 +1,28 @@
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
+ #chatContainer::-webkit-scrollbar {
+     width: 6px;
+ }
 
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
+ #chatContainer::-webkit-scrollbar-thumb {
+     background: #c7d2fe;
+     border-radius: 10px;
+ }
 
-::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 10px;
-}
+ #chatContainer::-webkit-scrollbar-track {
+     background: transparent;
+ }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
+ @keyframes fadeIn {
+     from {
+         opacity: 0;
+         transform: translateY(10px);
+     }
 
-/* Animation for messages */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+     to {
+         opacity: 1;
+         transform: translateY(0);
+     }
+ }
 
-.message {
-    animation: fadeInUp 0.3s ease-out;
-}
-
-/* Loading animation */
-.typing-indicator {
-    display: inline-block;
-    position: relative;
-    width: 80px;
-    height: 30px;
-}
-
-.typing-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #6b7280;
-    position: absolute;
-    animation: typing 1.5s infinite ease-in-out;
-}
-
-.typing-dot:nth-child(1) {
-    left: 8px;
-    animation-delay: 0s;
-}
-
-.typing-dot:nth-child(2) {
-    left: 24px;
-    animation-delay: 0.2s;
-}
-
-.typing-dot:nth-child(3) {
-    left: 40px;
-    animation-delay: 0.4s;
-}
-
-@keyframes typing {
-    0%, 60%, 100% {
-        transform: translateY(0);
-        opacity: 0.6;
-    }
-    30% {
-        transform: translateY(-10px);
-        opacity: 1;
-    }
-}
-
-/* Code block styling */
-.code-block {
-    background-color: #1e293b;
-    color: #e2e8f0;
-    font-family: 'Courier New', monospace;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin: 0.5rem 0;
-    overflow-x: auto;
-}
-
-.code-keyword {
-    color: #60a5fa;
-}
-
-.code-string {
-    color: #34d399;
-}
-
-.code-comment {
-    color: #94a3b8;
-}
+ .animate-fade-in {
+     animation: fadeIn 0.4s ease-out;
+ }

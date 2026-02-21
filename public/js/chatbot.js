@@ -128,7 +128,6 @@ class ChatBot {
      */
     renderSuggestedQuestions() {
         const emptyState = document.getElementById('emptyState');
-        console.log('Empty state element:', emptyState);
         if (!emptyState) return;
 
         const block = document.getElementById('suggestionsBlock');
@@ -138,7 +137,6 @@ class ChatBot {
 
         // Clear any existing suggestion nodes
         list.innerHTML = '';
-        console.log('Rendering suggested questions:', this.suggestedQuestions);
         if (!this.suggestedQuestions || this.suggestedQuestions.length === 0) {
             block.classList.add('hidden');
             return;
@@ -486,12 +484,45 @@ class ChatBot {
             console.error('Error clearing chat:', error);
         }
     }
+
+    async checkAuth() {
+        try {
+            const response = await fetch('/auth/me');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return null;
+            }
+            return await response.json();
+        } catch (error) {
+            window.location.href = '/login.html';
+            return null;
+        }
+    }
+
+    async logout() {
+        localStorage.removeItem('cleanupNotificationShown');
+        await fetch('/auth/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+    }
+
+    openDeleteModal() {
+        document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+    }
+
+    closeDeleteModal() {
+        document.getElementById('deleteConfirmationModal').classList.add('hidden');
+    }
+
+    confirmDelete() {
+        chatbot.closeDeleteModal();
+        chatbot.clearChat();
+    }
 }
 
 /**
  * Initialize chatbot when DOM is loaded.
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     window.chatbot = new ChatBot();
 
     // Show cleanup notification every login
@@ -505,5 +536,37 @@ document.addEventListener('DOMContentLoaded', () => {
         closeBtn.onclick = () => {
             popup.classList.add('hidden');
         };
+    }
+
+    const user = await chatbot.checkAuth();
+    if (user) {
+        const menuButton = document.createElement('button');
+        menuButton.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+        menuButton.setAttribute('style', 'position: fixed; top: 15px; right: 15px; background: white; border: none; padding: 10px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; z-index: 1000; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;');
+        menuButton.setAttribute('id', 'userMenuButton');
+
+        const dropdown = document.createElement('div');
+        dropdown.setAttribute('id', 'userDropdown');
+        dropdown.setAttribute('style', 'position: fixed; top: 65px; right: 15px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); min-width: 180px; z-index: 1001; display: none;');
+        dropdown.innerHTML = `
+                    <div style="padding: 8px; border-bottom: 1px solid #eee; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        ${user.name || user.email}
+                    </div>
+                    <button onclick="chatbot.logout()" style="display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px; color: #ff4444; cursor: pointer; border-radius: 6px; font-size: 14px;">
+                        Logout
+                    </button>
+                `;
+
+        document.body.appendChild(menuButton);
+        document.body.appendChild(dropdown);
+
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', () => {
+            dropdown.style.display = 'none';
+        });
     }
 });
