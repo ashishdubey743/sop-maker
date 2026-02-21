@@ -1,5 +1,8 @@
 const chatbotService = require('@services/ChatbotService');
 
+/**
+ * Helper function to modify the user query using AI.
+ */
 exports.magicSOP = async (req, res) => {
     try {
         const { text } = req.body;

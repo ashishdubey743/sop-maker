@@ -1,5 +1,8 @@
 const chatbotModel = require('@models/Chatbot');
 
+/**
+ * Save the answer of message with question.
+ */
 exports.updateMessageWithAnswer = async (req, res) => {
     try {
         const { answer, docPath } = req.body;
@@ -19,6 +22,9 @@ exports.updateMessageWithAnswer = async (req, res) => {
     }
 }
 
+/**
+ * Save the the user query in database.
+ */
 exports.saveMessageInDatabase = async (req, res) => {
     try {
         const { question, answer } = req.body;
@@ -35,6 +41,9 @@ exports.saveMessageInDatabase = async (req, res) => {
     }
 }
 
+/**
+ * Load chat history of current user.
+ */
 exports.loadChatHistory = async (req, res) => {
     try {
         const messages = await chatbotModel.find({
@@ -47,6 +56,9 @@ exports.loadChatHistory = async (req, res) => {
     }
 }
 
+/**
+ * Helper function to download the SOP.
+ */
 exports.downloadSOP = async (req, res) => {
     try {
         const { filename } = req.params;
@@ -61,6 +73,9 @@ exports.downloadSOP = async (req, res) => {
     }
 }
 
+/**
+ * Clear chat.
+ */
 exports.clearChat = async (req, res) => {
     try {
         const userId = req.session.userId;

@@ -5,10 +5,17 @@ const path = require('path');
 const cron = require('node-cron');
 
 class CleanupService {
+
+    /**
+     * Constructor.
+     */
     constructor() {
         this.tempPath = path.join(__dirname, '../storage/temp');
     }
 
+    /**
+     * Clean the temp files.
+     */
     async cleanupTempFiles() {
         try {
             console.log(`[${new Date().toISOString()}] Starting temp files cleanup...`);
@@ -33,8 +40,6 @@ class CleanupService {
                         console.log(`Deleted: ${file}`);
                         deletedCount++;
                     } else {
-                        // If it's a directory, you might want to delete it recursively
-                        // For now, skip directories
                         console.log(`Skipping directory: ${file}`);
                     }
                 } catch (error) {
@@ -46,6 +51,9 @@ class CleanupService {
         }
     }
 
+    /**
+     * Clean the chatbot document in mongo.
+     */
     async cleanupChatbotMessages() {
         try {
             await connectDB();
@@ -59,7 +67,7 @@ class CleanupService {
     scheduleCleanup() {
         // Schedule cleanup every day at 11:00 PM
         // cron format: minute hour day month day-of-week
-        cron.schedule('15 03 * * *', async () => {
+        cron.schedule('00 23 * * *', async () => {
             console.log(`[${new Date().toISOString()}] Running scheduled cleanup...`);
             await this.cleanupTempFiles();
             await this.cleanupChatbotMessages();

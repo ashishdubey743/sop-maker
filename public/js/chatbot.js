@@ -2,6 +2,22 @@
  * ChatBot class.
  */
 class ChatBot {
+
+    /**
+     * Constructor.
+     */
+    constructor() {
+        this.lastMessageId = '';
+        this.coversationAvailable = false;
+        this.suggestedQuestions = [];
+        this.currentSession = this.getCurrentSession();
+        this.initializeEventListeners();
+        this.loadSuggestions();
+        this.loadChatHistory();
+        this.initializeMagicSOPButton();
+        this.loading = false;
+    }
+
     /**
      * Initialize magic SOP icon click handler
      */
@@ -37,21 +53,6 @@ class ChatBot {
     }
 
     /**
-     * Constructor.
-     */
-    constructor() {
-        this.lastMessageId = '';
-        this.coversationAvailable = false;
-        this.suggestedQuestions = [];
-        this.currentSession = this.getCurrentSession();
-        this.initializeEventListeners();
-        this.loadSuggestions();
-        this.loadChatHistory();
-        this.initializeMagicSOPButton();
-        this.loading = false;
-    }
-
-    /**
      * Load suggested questions from a JSON file
      */
     async loadSuggestions() {
@@ -82,7 +83,6 @@ class ChatBot {
 
             if (response.ok) {
                 const emptyState = document.getElementById('emptyState');
-
 
                 const messages = await response.json();
 
@@ -123,6 +123,7 @@ class ChatBot {
             chatContent.scrollTop = chatContent.scrollHeight;
         }
     }
+
     /**
      * Render suggested questions in the empty state and attach click handlers.
      */
@@ -280,6 +281,9 @@ class ChatBot {
         });
     }
 
+    /**
+     * Save message in database.
+     */
     async saveMessageInDatabase({ message, role, session }) {
         if (role === 'user') {
             // Create a new document with only the question
@@ -305,6 +309,9 @@ class ChatBot {
         }
     }
 
+    /**
+     * Helper function to add answer to the question in database.
+     */
     async updateMessageWithAnswer({ messageId, answer, docPath }) {
         if (!messageId) return;
 
@@ -326,6 +333,9 @@ class ChatBot {
         }
     }
 
+    /**
+     * Get current session.
+     */
     getCurrentSession() {
         let sessionId = localStorage.getItem('chat_session');
         if (!sessionId) {
@@ -485,6 +495,9 @@ class ChatBot {
         }
     }
 
+    /**
+     * Check Authentication.
+     */
     async checkAuth() {
         try {
             const response = await fetch('/auth/me');
@@ -499,20 +512,32 @@ class ChatBot {
         }
     }
 
+    /**
+     * Logout user.
+     */
     async logout() {
         localStorage.removeItem('cleanupNotificationShown');
         await fetch('/auth/logout', { method: 'POST' });
         window.location.href = '/login.html';
     }
 
+    /**
+     * Open delete modal.
+     */
     openDeleteModal() {
         document.getElementById('deleteConfirmationModal').classList.remove('hidden');
     }
 
+    /**
+     * Close delete modal.
+     */
     closeDeleteModal() {
         document.getElementById('deleteConfirmationModal').classList.add('hidden');
     }
 
+    /**
+     * Confirm deletion.
+     */
     confirmDelete() {
         chatbot.closeDeleteModal();
         chatbot.clearChat();

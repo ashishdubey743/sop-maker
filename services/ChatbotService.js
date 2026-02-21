@@ -3,8 +3,11 @@ const { nanoid } = require('nanoid');
 require('dotenv').config();
 
 class ChatbotService {
-    getPrompt({ message, style }) {
-        return `
+  /**
+ * Make prompt to get SOP or general answer.
+ */
+  getPrompt({ message, style }) {
+    return `
 You are a Principal Systems Architect and Enterprise SOP Author.
 
 You are NOT allowed to generate generic documentation.
@@ -234,13 +237,15 @@ State reason explicitly.
 7. If vague request, state architectural assumptions clearly.
 
 `;
-    }
+  }
 
 
 
-
-    getTableAnalysisPrompt() {
-        return `
+/**
+ * Table analysis prompt.
+ */
+  getTableAnalysisPrompt() {
+    return `
 You are a database architect.
 
 Your job is NOT to create tables automatically.
@@ -262,15 +267,18 @@ Return:
 Never generate unnecessary tables.
 Never use generic placeholder schema.
 `;
-    }
+  }
 
+/**
+ * get the title of SOP.
+ */
+  getContentTitle(content) {
+    const titleMatch = content.match(/^#\s*(.+?)(?:\n|$)/) ||
+      content.match(/SOP:\s*(.+?)(?:\n|$)/i) ||
+      content.match(/📋\s*(.+?)(?:\n|$)/);
 
-    getContentTitle(content) {
-        const titleMatch = content.match(/^#\s*(.+?)(?:\n|$)/) ||
-            content.match(/SOP:\s*(.+?)(?:\n|$)/i) ||
-            content.match(/📋\s*(.+?)(?:\n|$)/);
-
-        return titleMatch ? titleMatch[1].replace('📋', '').trim() : `SOP - ${nanoid()}`;
-    }
+    return titleMatch ? titleMatch[1].replace('📋', '').trim() : `SOP - ${nanoid()}`;
+  }
 }
+
 module.exports = new ChatbotService();

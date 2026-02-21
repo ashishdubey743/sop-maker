@@ -1,7 +1,9 @@
 const chatbotService = require('@services/ChatbotService');
 const docxService = require('@services/DocxService');
 
-
+/**
+ * Send user message to AI model.
+ */
 exports.ChatWithAIModel = async (req, res) => {
     try {
         const { message, style = 'standard' } = req.body;

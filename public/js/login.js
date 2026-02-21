@@ -1,7 +1,9 @@
 if (localStorage.getItem('cleanupAlertShown')) {
     localStorage.removeItem('cleanupAlertShown');
 }
-// Check if already logged in
+/**
+ *  Check if user already logged in.
+ */
 async function checkAuth() {
     try {
         const response = await fetch('/auth/me');
@@ -19,10 +21,16 @@ async function checkAuth() {
     }
 }
 
+/**
+ * Helper function to hit google auth route.
+ */
 function loginWithGoogle() {
     window.location.href = '/auth/google';
 }
 
+/**
+ * Logout current user.
+ */
 async function logout() {
     try {
         await fetch('/auth/logout', { method: 'POST' });
@@ -33,6 +41,9 @@ async function logout() {
     }
 }
 
+/**
+ * Show current user information.
+ */
 function showUserInfo(user) {
     document.getElementById('loginSection').classList.add('hidden');
     document.getElementById('userInfo').classList.remove('hidden');
@@ -40,12 +51,18 @@ function showUserInfo(user) {
     showSuccess(`Welcome, ${user.name || user.email}! Redirecting...`);
 }
 
+/**
+ * Hide current user information.
+ */
 function hideUserInfo() {
     document.getElementById('loginSection').classList.remove('hidden');
     document.getElementById('userInfo').classList.add('hidden');
     document.getElementById('error').classList.add('hidden');
 }
 
+/**
+ * Helper function to show error.
+ */
 function showError(message) {
     const errorEl = document.getElementById('error');
     errorEl.textContent = message;
@@ -56,6 +73,9 @@ function showError(message) {
     }, 5000);
 }
 
+/**
+ * SHelper function to show success message while login.
+ */
 function showSuccess(message) {
     const errorEl = document.getElementById('error');
     errorEl.textContent = message;

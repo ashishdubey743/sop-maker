@@ -3,6 +3,9 @@ const { generateCodeVerifier } = require("arctic");
 const googleAuth = require('@config/googleAuth');
 const User = require('@models/User');
 
+/**
+ * Initiate google login.
+ */
 exports.googleLogin = async (req, res) => {
     try {
         const state = crypto.randomBytes(16).toString('hex');
@@ -28,6 +31,9 @@ exports.googleLogin = async (req, res) => {
     }
 };
 
+/**
+ * Callback to get response from google while user login.
+ */
 exports.googleCallback = async (req, res) => {
     try {
         const { code, state } = req.query;
@@ -88,6 +94,9 @@ exports.googleCallback = async (req, res) => {
     }
 };
 
+/**
+ * Log out current user.
+ */
 exports.logout = (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -98,6 +107,9 @@ exports.logout = (req, res) => {
     });
 };
 
+/**
+ * Get current user.
+ */
 exports.getCurrentUser = (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Not authenticated' });
