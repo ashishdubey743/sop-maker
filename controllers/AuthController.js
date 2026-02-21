@@ -76,6 +76,7 @@ exports.googleCallback = async (req, res) => {
         req.session.userEmail = user.email;
         req.session.userName = user.name;
         req.session.userRole = user.role;
+        req.session.sessionVersion = global.globalSessionVersion;
 
         await req.session.save();
         console.log("User Authenticated");

@@ -7,6 +7,7 @@ const cleanupService = require('@services/CleanupService');
 const session = require('express-session');
 const crypto = require('crypto');
 const routes = require('@routes');
+global.globalSessionVersion = Date.now();
 
 cleanupService.scheduleCleanup();
 connectDB();

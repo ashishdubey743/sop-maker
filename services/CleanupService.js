@@ -19,10 +19,10 @@ class CleanupService {
                 await fs.mkdir(this.tempPath, { recursive: true });
                 return;
             }
-            
+
             const files = await fs.readdir(this.tempPath);
             let deletedCount = 0;
-            
+
             for (const file of files) {
                 const filePath = path.join(this.tempPath, file);
                 try {
@@ -63,6 +63,12 @@ class CleanupService {
             console.log(`[${new Date().toISOString()}] Running scheduled cleanup...`);
             await this.cleanupTempFiles();
             await this.cleanupChatbotMessages();
+        });
+
+        // Run every 6 hours
+        cron.schedule('0 */6 * * *', async () => {
+            global.globalSessionVersion = Date.now();
+            console.log('All active sessions invalidated.');
         });
     }
 }

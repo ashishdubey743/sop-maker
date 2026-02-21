@@ -136,6 +136,9 @@
     </style>
 
     <script>
+        if(localStorage.getItem('cleanupAlertShown')) {
+            localStorage.removeItem('cleanupAlertShown');
+        }
         // Check if already logged in
         async function checkAuth() {
             try {

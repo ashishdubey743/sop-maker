@@ -350,7 +350,10 @@ class ChatBot {
                 },
                 body: JSON.stringify({ message: message })
             });
-
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
             if (response.ok) {
                 const data = await response.json();
                 return { botResponse: data.botResponse, docPath: data.docPath };
@@ -495,17 +498,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const popup = document.getElementById('cleanupNotification');
     const closeBtn = document.getElementById('closeCleanupNotification');
     if (popup && closeBtn) {
-        console.log(localStorage.getItem('cleanupNotificationShown'));
-        if (!localStorage.getItem('cleanupNotificationShown')) {
+        if (!localStorage.getItem('cleanupAlertShown')) {
             popup.classList.remove('hidden');
-            localStorage.setItem('cleanupNotificationShown', 'true');
+            localStorage.setItem('cleanupAlertShown', 'true');
         }
         closeBtn.onclick = () => {
             popup.classList.add('hidden');
         };
-
-        setInterval(() => {
-            localStorage.removeItem('cleanupNotificationShown');
-        }, 6 * 60 * 60 * 1000); // Reset every 6 hours
     }
 });
