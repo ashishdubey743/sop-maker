@@ -1,12 +1,14 @@
 require('module-alias/register');
 require('dotenv').config();
 const express = require('express');
+const favicon = require('serve-favicon');
 const app = express();
 const connectDB = require('@database/connection');
 const cleanupService = require('@services/CleanupService');
 const session = require('express-session');
 const crypto = require('crypto');
 const routes = require('@routes');
+const path = require('path');
 global.globalSessionVersion = Date.now();
 
 cleanupService.scheduleCleanup();
@@ -18,6 +20,7 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.use(session({
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
