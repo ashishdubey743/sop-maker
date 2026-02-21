@@ -83,11 +83,12 @@ class ChatBot {
 
             if (response.ok) {
                 const emptyState = document.getElementById('emptyState');
-
+                const clearChatButton = document.getElementById('clearChat');
                 const messages = await response.json();
 
                 if (messages.length > 0) {
                     emptyState.style.display = 'none';
+                    clearChatButton.style.display = 'block';
                     this.coversationAvailable = true;
                     // Display all messages from the session
                     messages.forEach(msg => {
@@ -104,6 +105,7 @@ class ChatBot {
                     }, 100);
                 } else {
                     emptyState.style.display = 'flex';
+                    clearChatButton.style.display = 'none';
                     this.renderSuggestedQuestions();
                 }
             }
@@ -257,6 +259,7 @@ class ChatBot {
             this.lastMessageId = documentId;
             document.getElementById('magicSOPButton').disabled = true;
             document.getElementById('sendButton').disabled = true;
+            document.getElementById('clearChat').style.display = 'block';
         });
 
         input.value = '';
