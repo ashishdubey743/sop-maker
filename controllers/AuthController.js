@@ -86,7 +86,7 @@ exports.googleCallback = async (req, res) => {
 
         await req.session.save();
         console.log("User Authenticated");
-        res.redirect('/index.html');
+        res.redirect('/chatbot.html');
 
     } catch (error) {
         console.error('Google callback error:', error);

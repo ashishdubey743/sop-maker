@@ -69,4 +69,8 @@ router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
+router.get('/sop-maker', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'chatbot.html'));
+});
+
 module.exports = router;

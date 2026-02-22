@@ -521,7 +521,7 @@ class ChatBot {
     async logout() {
         localStorage.removeItem('cleanupNotificationShown');
         await fetch('/auth/logout', { method: 'POST' });
-        window.location.href = '/login.html';
+        window.location.href = '/index.html';
     }
 
     /**

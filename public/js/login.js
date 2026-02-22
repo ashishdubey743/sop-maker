@@ -11,9 +11,7 @@ async function checkAuth() {
             const user = await response.json();
             showUserInfo(user);
             // Redirect to main page if authenticated
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1500);
+            window.location.href = '/sop-maker';
         }
     } catch (error) {
         // Not authenticated, stay on login page
