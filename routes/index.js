@@ -4,6 +4,7 @@ const router = express.Router();
 const { isAuthenticated } = require('@middlewares/authMiddleware');
 const authRoutes = require('@routes/authRoutes');
 const MagicSOPController = require('@controllers/MagicSOPController');
+const { SitemapStream, streamToPromise } = require('sitemap');
 
 /**
  * Magic SOP Query
@@ -71,6 +72,27 @@ router.get('/', (req, res) => {
 
 router.get('/sop-maker', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'chatbot.html'));
+});
+
+router.get('/sitemap.xml', async (req, res) => {
+    try {
+        const smStream = new SitemapStream({
+            hostname: process.env.BASE_URL,
+        });
+
+        smStream.write({ url: '/', changefreq: 'daily', priority: 1.0 });
+        smStream.write({ url: '/login.html', changefreq: 'monthly', priority: 0.5 });
+        smStream.write({ url: '/chatbot.html', changefreq: 'monthly', priority: 0.5 });
+
+        smStream.end();
+
+        const sitemap = await streamToPromise(smStream);
+
+        res.header('Content-Type', 'application/xml');
+        res.send(sitemap.toString());
+    } catch (err) {
+        res.status(500).send('Error generating sitemap');
+    }
 });
 
 module.exports = router;
