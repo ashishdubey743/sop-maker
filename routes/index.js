@@ -100,4 +100,40 @@ router.get('/sitemap.xml', async (req, res) => {
     }
 });
 
+router.get('/robots.txt', (req, res) => {
+    const baseUrl = process.env.BASE_URL;
+
+    res.type('text/plain');
+    res.send(`
+        User-agent: *
+        Allow: /
+
+        User-agent: Amazonbot
+        Disallow: /
+
+        User-agent: Applebot-Extended
+        Disallow: /
+
+        User-agent: Bytespider
+        Disallow: /
+
+        User-agent: CCBot
+        Disallow: /
+
+        User-agent: ClaudeBot
+        Disallow: /
+
+        User-agent: Google-Extended
+        Disallow: /
+
+        User-agent: GPTBot
+        Disallow: /
+
+        User-agent: meta-externalagent
+        Disallow: /
+
+        Sitemap: ${baseUrl}/sitemap.xml
+    `);
+});
+
 module.exports = router;
