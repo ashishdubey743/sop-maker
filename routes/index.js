@@ -83,6 +83,11 @@ router.get('/sitemap.xml', async (req, res) => {
         smStream.write({ url: '/', changefreq: 'daily', priority: 1.0 });
         smStream.write({ url: '/login.html', changefreq: 'monthly', priority: 0.5 });
         smStream.write({ url: '/chatbot.html', changefreq: 'monthly', priority: 0.5 });
+        smStream.write({
+            url: '/what-is-sop-maker.html',
+            changefreq: 'weekly',
+            priority: 0.9
+        });
 
         smStream.end();
 
