@@ -5,7 +5,6 @@ const { isAuthenticated } = require('@middlewares/authMiddleware');
 const authRoutes = require('@routes/authRoutes');
 const MagicSOPController = require('@controllers/MagicSOPController');
 const { SitemapStream, streamToPromise } = require('sitemap');
-const fs = require('fs').promises;
 
 /**
  * Magic SOP Query
@@ -136,18 +135,5 @@ router.get('/robots.txt', (req, res) => {
         Sitemap: ${baseUrl}/sitemap.xml
     `);
 });
-
-// To test cron - remove later
-router.get('/api/temp-files',
-    isAuthenticated,
-    async (req, res) => {
-        try {
-            const files = await fs.readdir(path.join(__dirname, '..', 'storage', 'temp'));
-            res.json({ count: files.length });
-        } catch (error) {
-            res.status(500).json({ error: 'Failed to read temp directory' });
-        }
-    }
-);
 
 module.exports = router;
