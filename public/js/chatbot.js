@@ -351,27 +351,69 @@ class ChatBot {
     /**
      * Get bot response from server API.
      */
-    async getBotResponse(message) {
-        try {
-            // Try to get response from server API
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: message })
-            });
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
+    getBotResponse(message) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        style: 'standard'
+                    })
+                });
+
+                if (!response.body) {
+                    return reject("No response body");
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResponse = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (let line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const jsonStr = line.replace('data: ', '').trim();
+
+                            if (!jsonStr) continue;
+
+                            try {
+                                const parsed = JSON.parse(jsonStr);
+
+                                if (parsed.done) {
+                                    fullResponse = parsed.response;
+                                    var docPath = parsed.docPath;
+                                }
+
+                                if (parsed.error) {
+                                    return reject(parsed.error);
+                                }
+
+                            } catch (err) {
+                                // ignore partial JSON
+                            }
+                        }
+                    }
+                }
+
+                resolve({
+                    botResponse: fullResponse,
+                    docPath: docPath
+                });
+
+            } catch (error) {
+                reject(error);
             }
-            if (response.ok) {
-                const data = await response.json();
-                return { botResponse: data.botResponse, docPath: data.docPath };
-            }
-        } catch (error) {
-            console.log('Error processing request:', error);
-        }
+        });
     }
 
     /**

@@ -50,7 +50,6 @@ If the user input is gibberish, nonsense, irrelevant, or not a valid technical o
 → DO NOT generate or mention any SOP or technical documentation.
 → At the end, add exactly this line:
 
-SOP was not required for this query.
 
 If category is A, B, or C:
 → Respond naturally as a helpful engineer.
@@ -61,7 +60,6 @@ If category is A, B, or C:
 → No mention of classification.
 → At the end, add exactly this line:
 
-SOP was not required for this query.
 
 Do not output anything else outside the answer.
 
