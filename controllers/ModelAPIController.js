@@ -50,6 +50,8 @@ exports.ChatWithAIModel = async (req, res) => {
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
         let fullResponse = '';
+        const headingSeen = new Set();
+        const headingCarry = { value: '' };
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -65,6 +67,13 @@ exports.ChatWithAIModel = async (req, res) => {
                         const content = parsed?.choices?.[0]?.delta?.content;
                         if (content) {
                             fullResponse += content;
+
+                            detectAndEmitHeadings({
+                                textChunk: content,
+                                carry: headingCarry,
+                                seen: headingSeen,
+                                res
+                            });
                         }
                     } catch (err) {
                         // Ignore parsing errors
@@ -134,4 +143,45 @@ function validateSOPHeadings(fullResponse) {
         isValid: Object.values(results).every(Boolean),
         details: results
     };
+}
+
+/**
+ * Helper function to detect and emit heading to show while creating response (in loader)
+ */
+function detectAndEmitHeadings({ textChunk, carry, seen, res }) {
+    // keep a small rolling buffer because headings can arrive split across chunks
+    carry.value = (carry.value + (textChunk || '')).slice(-500);
+
+    // headings you want to detect
+    const headingMap = [
+        { key: 'Purpose', label: 'Started working on it…' },
+        { key: 'Scope', label: 'Adding Scope…' },
+        { key: 'Responsibilities', label: 'Adding Responsibilities…' },
+        { key: 'Architecture Overview', label: 'Adding Architecture…' },
+        { key: 'Prerequisites', label: 'Adding Prerequisites…' },
+        { key: 'Dependencies', label: 'Adding Dependencies…' },
+        { key: 'Data Model / Tables Affected', label: 'Adding Data Model…' },
+        { key: 'Procedure Steps', label: 'Adding Steps…' },
+        { key: 'Quality Checks / Validation', label: 'Adding Quality Checks…' },
+        { key: 'Rollback Plan', label: 'Adding Rollback Plan…' },
+    ];
+
+    for (const h of headingMap) {
+        if (seen.has(h.key)) continue;
+
+        // matches: "## Scope" OR "# Scope" OR "\nScope\n" (loose)
+        const re = new RegExp(`(^|\\n)#+\\s*${escapeRegExp(h.key)}\\b|(^|\\n)\\s*${escapeRegExp(h.key)}\\s*\\n`, 'i');
+
+        if (re.test(carry.value)) {
+            seen.add(h.key);
+            res.write(`data: ${JSON.stringify({ heading: h.label })}\n\n`);
+        }
+    }
+}
+
+/**
+ * Escapes special characters in a string.
+ */
+function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

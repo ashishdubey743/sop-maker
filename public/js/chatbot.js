@@ -389,6 +389,11 @@ class ChatBot {
                             try {
                                 const parsed = JSON.parse(jsonStr);
 
+                                if (parsed.heading) {
+                                    const el = document.getElementById('loadingMessage');
+                                    if (el) el.textContent = parsed.heading;
+                                }
+
                                 if (parsed.done) {
                                     fullResponse = parsed.response;
                                     var docPath = parsed.docPath;
@@ -428,7 +433,7 @@ class ChatBot {
         typingDiv.innerHTML = `
            <div class="flex items-center space-x-2">
                 <div class="w-8 h-8 border-2 border-primary border-t-purple-600 rounded-full animate-spin"></div>
-                <span class="font-bold text-lg text-black">Thinking...</span>
+                <span id="loadingMessage" class="font-bold text-lg text-black">Thinking...</span>
             </div>
         `;
         chatContainer.appendChild(typingDiv);
